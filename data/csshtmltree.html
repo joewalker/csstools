@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html
+  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<head>
+  <title>&style.panelTitle;</title>
+  <meta http-equiv="Content-Type"
+    content="application/xhtml+xml; charset=UTF-8" />
+  <link rel="stylesheet" type="text/css"
+    href="chrome://browser/content/csshtmltree.css" />
+</head>
+<body role="application">
+
+<!-- The output from #templateRoot (below) is inserted here. -->
+<div id="root">Hello
+</div>
+
+<!--
+To visually debug the templates without running firefox, alter the display:none
+-->
+<div style="display:none;">
+  <!--
+  templateRoot sits at the top of the window showing what we're looking at.
+  For data it needs an instance of CssHtmlTree.
+  -->
+  <div id="templateRoot">
+    <p class="path">
+      <label>&style.lookingAtLabel;</label>
+      <ol>
+        <li foreach="item in ${pathElements}">
+          <a href="#" onclick="${pathClick}" __pathElement="${item.element}">
+            ${__element.pathElement = item.element; item.display}
+            ${item.display}
+          </a>
+        </li>
+      </ol>
+    </p>
+
+    <div class="sheetFilter">
+      <xul:label value="&style.displaySheetLabel;" control="sheetList" />
+      <!-- We've been told that xul:menulist breaks with spaces -->
+      <xul:menulist _id="sheetList" label="&style.displaySheetLabel;"
+          oncommand="${sheetChange}"
+        ><xul:menupopup
+          ><xul:menuitem foreach="sheet in ${cssLogic.sheets}"
+              value="${sheet.href}" label="${sheet.shortSource}"
+          /><xul:menuitem value="all" label="&style.displayAllSheets;"
+          /><xul:menuitem value="ua" label="&style.displayBrowserSheets;"
+        /></xul:menupopup
+      ></xul:menulist>
+    </div>
+
+    <div _id="groups">
+      <div foreach="group in ${styleGroups}" class="group" open="false"
+            save="${group.element}">
+        <h1 onclick="${group.click}">${group.localName}</h1>
+        <div save="${group.properties}"></div>
+      </div>
+    </div>
+
+    <p class="sheet_line">
+      <label>
+        <input type="checkbox" onchange="${toggleSpecificity}"
+            save="${specificityInput}"/>
+        &style.specificityLabel;
+      </label>
+      <a class="link" href="https://developer.mozilla.org/en/CSS/Specificity"
+          target="_blank">&style.specificityHelpLink;</a>
+    </p>
+  </div>
+
+  <!--
+  A templateProperties sits inside each templateGroups to show the properties
+  themselves. Each needs data like this:
+  {
+    property: [ ..., ] // Array of PropertyViews from csshtmltree.js
+  }
+  -->
+  <div id="templateProperties">
+    <div foreach="property in ${propertyViews}" class="property-view"
+        open="false" save="${property.element}">
+      <div class="clearfix property-header" onclick="${property.click}">
+        <span class="property-name">
+          <a class="link" target="_blank" title="&style.property.helpLinkTitle;"
+              href="${property.link}">${property.name}</a>
+        </span>
+        <span class="property-value">${property.value}</span>
+        <span class="link">${property.ruleTitle(__element)}</span>
+      </div>
+      <table class="rules" save="${property.rules}"></table>
+    </div>
+  </div>
+
+  <!--
+  A templateRules sits inside each templateProperties showing the list of rules
+  that affect that property. Each needs data like this:
+  {
+    selectors: ..., // from cssLogic.getPropertyInfo(x).[un]matchedSelectors
+    statusText: function(status) {}, // convert rule.status to readable text
+    specificityTitle: function(rule) {}, // determine the CSS rule specificity
+        title to use for the given rule.
+    showUnmatchedRules: true / false, // show a "more unmatched rules" link
+    showUnmatchedRulesClick: function() {}, // click event handler for the
+        "show more unmatched rules"
+  }
+  This is a template so the parent does not need to be a table, except that
+  using a div a the parent causes the DOM to muck with the tr elements
+  -->
+  <table id="templateRules">
+    <loop foreach="selector in ${selectorViews}" if="${selector.selectorInfo.sheetAllowed}">
+      <tr>
+        <td class="rule-text status${selector.selectorInfo.status}">
+          ${selector.text(__element)}
+        </td>
+        <td class="rule-value">${selector.selectorInfo.value}</td>
+        <td class="rule-link">
+          <a target="_blank" class="link"
+              href="view-source:${selector.selectorInfo.href}"
+              title="${selector.selectorInfo.href}">${selector.selectorInfo.source}</a>
+        </td>
+      </tr>
+      <tr class="rule-score">
+        <td colspan="2">
+          <span title="${selector.specificityTitle}">
+            Score: ${selector.selectorInfo.specificityScore} Status: ${selector.statusText}
+          </span>
+        </td>
+      </tr>
+    </loop>
+    <tr if="${showUnmatchedLink}">
+      <td colspan="4">
+        <a href="#" onclick="${showUnmatchedLinkClick}"
+            class="link">${showUnmatchedLinkText}</a>
+      </td>
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>
+

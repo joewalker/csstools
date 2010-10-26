@@ -1,0 +1,45 @@
+
+<!-- LOCALIZATION NOTE (style.panelTitle): This is used inside the Style panel
+  -  of the Inspector tool. This is the panel title string used inside the web
+  -  page of the panel. -->
+<!ENTITY style.panelTitle                     "Style">
+
+<!-- LOCALIZATION NOTE (style.lookingAtLabel): This is used inside the Style
+  -  panel of the Inspector tool. This is the label for the path of the
+  -  highlighted element in the web page. This path is based on the document
+  -  tree. -->
+<!ENTITY style.lookingAtLabel                 "Looking at:">
+
+<!-- LOCALIZATION NOTE (style.specificityLabel): This is used inside the Style
+     panel of the Inspector tool. This allows the user to enable the showing of
+     the specificity of the style sheet rules. -->
+<!ENTITY style.specificityLabel               "Show rule scores.">
+
+<!-- LOCALIZATION NOTE (style.specificityHelpLink): This is used inside the
+  -  Style panel of the Inspector tool. This allows the user to display
+  -  additional information on the specificity of style sheet rules. -->
+<!ENTITY style.specificityHelpLink            "Help!">
+
+<!-- LOCALIZATION NOTE (style.property.helpLinkTitle): This is used inside
+  -  the Style panel of the Inspector tool. For each style property the user can
+  -  hover it and get a help link button which allows one to quickly jump to the
+  -  documentation from the Mozilla Developer Network site. This is the link title
+  -  shown in the hover tooltip. -->
+<!ENTITY style.property.helpLinkTitle         "Read the documentation for this property">
+
+<!-- LOCALIZATION NOTE (style.displaySheetLabel): This is used inside the Style
+  -  panel of the Inspector tool. This allows the user to filter the rules
+  -  displayed based on their source, based on where the rules come from. -->
+<!ENTITY style.displaySheetLabel                "Display:">
+
+<!-- LOCALIZATION NOTE (style.displayAllSheets): This is used inside the Style
+  -  panel of the Inspector tool. This allows the user to filter the rules
+  -  displayed based on their source: all sheets will be shown. -->
+<!ENTITY style.displayAllSheets               "All sheets">
+
+<!-- LOCALIZATION NOTE (style.displayBrowserSheets): This is used inside the
+  -  Style panel of the Inspector tool. This allows the user to filter the rules
+  -  displayed based on their source: all sheets will be shown, including those
+  -  native to the browser (the default styles). -->
+<!ENTITY style.displayBrowserSheets           "Include browser sheets">
+

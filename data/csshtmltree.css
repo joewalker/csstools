@@ -1,0 +1,208 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is mozilla.org code.
+ *
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Joe Walker <jwalker@mozilla.com> (original author)
+ *   Mihai Șucan <mihai.sucan@gmail.com>
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+
+body {
+  font-family: Lucida Grande, sans-serif;
+  font-size: 11px;
+  background: #EEE;
+}
+
+.clearfix:after {
+  content: ".";
+  display: block;
+  clear: both;
+  height: 0;
+  visibility: hidden;
+  font-size: 0.1em;
+  overflow: hidden;
+}
+
+.path {
+  font-size: 11px;
+  word-spacing: -1px;
+}
+.path ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.path li {
+  -moz-border-radius: 3px;
+  padding: 2px 3px;
+  text-shadow: #FFF 0px 1px 0px;
+  font-weight: bold;
+  font-size: 11px;
+  background: -moz-linear-gradient(top, #F6F6FF, #E3E3FF);
+  display: inline-block;
+}
+.path li:after {
+  content: " > ";
+}
+.path li:last-child {
+  background: -moz-linear-gradient(top, #FFC, #DD8);
+}
+.path li:last-child:after {
+  color: red;
+  content: "";
+}
+
+#sheetList, #sheetList menuitem {
+  font-size: 1em;
+  font-weight: normal;
+}
+
+.sheet_line input {
+  vertical-align: middle;
+}
+
+.sheet_line label {
+  cursor: pointer;
+}
+
+#header, #footer {
+  padding: 5px;
+}
+
+#header label {
+  font-weight: bold;
+}
+#sheets {
+  -moz-margin-end: 10px;
+  margin-top: 5px;
+}
+h1 {
+  font-size: 13px;
+  padding: 2px 10px;
+  margin: 0px;
+  background: -moz-linear-gradient(top, #CCC, #AAA);
+  -moz-border-radius: 3px;
+  text-shadow: #FFF 0px 1px 0px;
+  cursor: pointer;
+}
+
+.property-header {
+  padding: 2px 5px;
+  background: -moz-linear-gradient(top, #F8F8F8, #E8E8E8);
+  color: #666;
+}
+
+.property-name, .property-value, .rule-count {
+  cursor: pointer;
+}
+
+/* Take away these two :visited rules to get a core dumper */
+.link { color: #55A;  }
+.link:visited { color: #55A;  }
+a.link { text-decoration: none; cursor: pointer }
+a.link:visited { text-decoration: none; }
+.rule-count {
+  float: right;
+}
+.property-view[open="false"] .rule-count:after {
+  content: " ▶";
+}
+.property-view[open="true"] .rule-count:after {
+  content: " ▼";
+}
+.property-name {
+  font-size: 12px;
+  font-weight: bold;
+  -moz-padding-end: 4px;
+  color: #000;
+}
+span.property-value {
+  -moz-padding-end: 5px;
+  font-size: 10px;
+}
+.group {
+  margin-top: 10px;
+}
+
+.group[open="false"] > div {
+  display: none;
+}
+.group[open="false"] > h1:after {
+  content: "▶";
+  float: right;
+  color: #333;
+  font-size: 11px;
+}
+.group[open="true"] > h1:after {
+  content: "▼";
+  float: right;
+  color: #333;
+  font-size: 11px;
+}
+
+.group, #header, #footer {
+  background: #FFF;
+  border-color: #E1E1E1;
+  border-style: solid;
+  border-width: 1px;
+  -moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  -moz-border-radius: 4px 4px 4px 4px;
+}
+
+.property-view[open="false"] > .rules {
+  display: none;
+}
+
+.rules {
+  max-height: 350px;
+  overflow-y: auto;
+}
+.rule-specificty, .rule-status {
+  white-space: nowrap;
+}
+.rule-link {
+  text-align: right;
+}
+.rule-score {
+  display: none;
+  font-size: 90%;
+  -moz-padding-start: 10px;
+}
+.show-specificity .rule-score {
+  display: table-row;
+}
+/* statuses - we'll clear these names up */
+.status3 { color: black; }                  /* best match */
+.status2 { text-decoration: line-through; } /* match */
+.status1 { color: #666; }                   /* parent match */
+.status0 { color: brown; }                  /* unmatched */
+
