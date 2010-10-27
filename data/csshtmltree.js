@@ -38,9 +38,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-console.log("in csshtmltree");
+// var cssHtml = new CssHtmlTree();
 
-var cssHtml = new CssHtmlTree();
+setTimeout(function() {
+  window.proxiedExample.sayHello("joe", function(reply) {
+    console.log("Demo: example.sayHello('joe')=" + reply);
+  });
+  window.proxiedExample.add(1, 2, function(reply) {
+    console.log("Demo: example.add(1, 2)=" + reply);
+  });
+}, 10);
 
 /**
  * CssHtmlTree is a panel that manages the display of a table sorted by style.
