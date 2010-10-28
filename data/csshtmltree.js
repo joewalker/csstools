@@ -38,16 +38,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// var cssHtml = new CssHtmlTree();
-
-setTimeout(function() {
-  window.proxiedExample.sayHello("joe", function(reply) {
-    console.log("Demo: example.sayHello('joe')=" + reply);
-  });
-  window.proxiedExample.add(1, 2, function(reply) {
-    console.log("Demo: example.add(1, 2)=" + reply);
-  });
-}, 10);
+var cssHtmlTree = new CssHtmlTree();
 
 /**
  * CssHtmlTree is a panel that manages the display of a table sorted by style.
@@ -57,7 +48,17 @@ setTimeout(function() {
  */
 function CssHtmlTree()
 {
-  this.cssLogic = new CssLogic();
+  console.log("hi");
+
+  let example = proxier.require("example");
+  example.sayHello("joe", function(reply) {
+    console.log("Demo: example.sayHello('joe')=" + reply);
+  });
+  example.add(1, 2, function(reply) {
+    console.log("Demo: example.add(1, 2)=" + reply);
+  });
+
+  this.cssLogic = proxier.require("cssLogic");
 
   // The element that we're inspecting, and the document that it comes from.
   this.viewedElement = null;
