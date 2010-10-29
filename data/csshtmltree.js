@@ -38,8 +38,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var cssHtmlTree = new CssHtmlTree();
-
 /**
  * CssHtmlTree is a panel that manages the display of a table sorted by style.
  * There should be one instance of CssHtmlTree per style display (of which there
@@ -48,136 +46,17 @@ var cssHtmlTree = new CssHtmlTree();
  */
 function CssHtmlTree()
 {
-  console.log("hi");
-
-  let example = proxier.require("example");
-  example.sayHello("joe", function(reply) {
-    console.log("Demo: example.sayHello('joe')=" + reply);
-  });
-  example.add(1, 2, function(reply) {
-    console.log("Demo: example.add(1, 2)=" + reply);
-  });
-
   this.cssLogic = proxier.require("cssLogic");
 
-  // The element that we're inspecting, and the document that it comes from.
-  this.viewedElement = null;
-  this.viewedDocument = null;
+  // Nodes used in templating
+  this.root = document.getElementById("root");
+  this.templateRoot = document.getElementById("templateRoot");
 
-  // The "Show rule scores" input element. Populated by template process.
-  this.specificityInput = null;
+  this.createStyleGroupViews();
+  CssHtmlTree.template(this.templateRoot, this.root, this);
 };
 
 CssHtmlTree.prototype = {
-  /**
-   * Focus the output display on a specific element.
-   * @param {nsIDOMElement} aElement The highlighted node to get styles for.
-   */
-  highlight: function CssHtmlTree_highlight(aElement)
-  {
-    this.viewedElement = aElement;
-    this.cssLogic.highlight(aElement);
-
-    // ============
-
-    this.styleWin = window;
-
-    // The document in which we display the results (csshtmltree.xhtml).
-    this.styleDocument = this.styleWin.contentWindow.document;
-
-    // Nodes used in templating
-    this.root = this.styleDocument.getElementById("root");
-    this.templateRoot = this.styleDocument.getElementById("templateRoot");
-
-    // Keep track of the "Show rule score" option. Does the user want to see the
-    // rule specificity or not?
-    this.showSpecificity = this.root.classList.contains("show-specificity");
-
-    this.createStyleGroupViews();
-
-    // Reset the style groups.
-    /*
-    for (let i = 0; i < this.styleGroups.length; i++) {
-      this.styleGroups[i].reset(aElement ? false : true);
-    }
-    */
-
-    if (this.viewedElement) {
-      this.viewedDocument = this.viewedElement.ownerDocument;
-      CssHtmlTree.template(this.templateRoot, this.root, this);
-
-      this.specificityInput.checked = this.showSpecificity;
-
-      // Update the web page to display the selected source filter.
-      let sheetList = this.styleDocument.getElementById("sheetList");
-      let sheetItem = null;
-      let sourceFilter = this.cssLogic.sourceFilter;
-      for (let i = 0; i < sheetList.itemCount; i++) {
-        sheetItem = sheetList.getItemAtIndex(i);
-        if (sheetItem && sheetItem.value === sourceFilter) {
-          sheetList.selectedIndex = i;
-          break;
-        }
-      }
-    } else {
-      this.viewedDocument = null;
-      this.root.innerHTML = "";
-    }
-
-  },
-
-  /**
-   * Toggle the display of specificity (rule scoring).
-   * Called by a click on the checkbox in the style panel
-   */
-  toggleSpecificity: function CssHtmlTree_toggleSpecificity()
-  {
-    this.root.classList.toggle("show-specificity");
-    this.showSpecificity = !this.showSpecificity;
-  },
-
-  /**
-   * Called when the user clicks on a parent element in the "current element"
-   * path.
-   *
-   * @param {Event} aEvent the DOM Event object.
-   */
-  pathClick: function CssHtmlTree_pathClick(aEvent)
-  {
-    aEvent.preventDefault();
-    if (aEvent.target && aEvent.target.pathElement &&
-        aEvent.target.pathElement != InspectorUI.selection) {
-      InspectorUI.inspectNode(aEvent.target.pathElement);
-    }
-  },
-
-  /**
-   * The oncommand event handler for the sheets menulist.
-   * @param {Event} aEvent the DOM event.
-   */
-  sheetChange: function CssHtmlTree_sheetChange(aEvent) {
-    let target = aEvent.target;
-    if (target.value === this.cssLogic.sourceFilter) {
-      return;
-    }
-
-    this.cssLogic.sourceFilter = target.value;
-
-    this.highlight(this.viewedElement);
-  },
-
-  /**
-   * Provide access to the path to get from document.body to the selected
-   * element.
-   *
-   * @return {array} the array holding the path from document.body to the
-   * selected element.
-   */
-  get pathElements()
-  {
-    return CssLogic.getShortNamePath(this.viewedElement);
-  },
-
   /**
    * The CSS groups as displayed by the UI.
    */
@@ -337,16 +216,7 @@ CssHtmlTree.prototype = {
  */
 CssHtmlTree.l10n = function CssHtmlTree_l10n(aName)
 {
-  if (!CssHtmlTree._strings) {
-    CssHtmlTree._strings = Services.strings.createBundle(
-        "chrome://browser/locale/inspector.properties");
-  }
-  try {
-    return CssHtmlTree._strings.GetStringFromName(aName);
-  } catch (ex) {
-    console.log("Error reading '" + aName + "'");
-    throw new Error("l10n error with " + aName);
-  }
+  return l10nLookup[aName];
 };
 
 /**
@@ -397,7 +267,7 @@ function StyleGroupView(aTree, aId, aPropertyNames)
 
   this.populated = false;
 
-  this.templateProperties = this.tree.styleDocument.getElementById("templateProperties");
+  this.templateProperties = document.getElementById("templateProperties");
 
   // Populated by templater: parent element containing the open attribute
   this.element = null;
@@ -480,7 +350,7 @@ function PropertyView(aTree, aGroup, aName)
 
   this.link = "https://developer.mozilla.org/en/CSS/" + aName;
 
-  this.templateRules = this.tree.styleDocument.getElementById("templateRules");
+  this.templateRules = document.getElementById("templateRules");
 
   // The parent element which contains the open attribute
   this.element = null;
@@ -702,39 +572,7 @@ SelectorView.prototype = {
       result += ".style";
     }
     return result;
-  },
-
-  get specificityTitle() {
-    let specificity = this.selectorInfo.specificity;
-
-    let important = "";
-    if (this.selectorInfo.important) {
-      important += CssHtmlTree.l10n("style.property.important");
-    }
-
-    let result = "";
-    if (this.selectorInfo.elementStyle) {
-      result = important;
-    } else {
-      let ids = CssHtmlTree.l10n("style.rule.specificity.ids");
-      let classes = CssHtmlTree.l10n("style.rule.specificity.classes");
-      let tags = CssHtmlTree.l10n("style.rule.specificity.tags");
-
-      ids = PluralForm.get(specificity.ids, ids).
-          replace("#1", specificity.ids);
-      classes = PluralForm.get(specificity.classes, classes).
-          replace("#1", specificity.classes);
-      tags = PluralForm.get(specificity.tags, tags).
-          replace("#1", specificity.tags);
-
-      result = CssHtmlTree._strings.formatStringFromName(
-          "style.rule.specificity",
-          [ [important, ids, classes, tags].join(" ") ],
-          1);
-    }
-
-    return result;
-  },
+  }
 };
 
 if (this.exports) {
@@ -744,3 +582,76 @@ if (this.exports) {
   exports.SelectorView = SelectorView;
 }
 
+/**
+ * We're not sure now we're going to do l10n yet, so this is a cut an paste from
+ * inspector.properties, with light tweakage so it will work here.
+ */
+let l10nLookup = {
+  // LOCALIZATION NOTE (style.property.numberOfRules): Semi-colon list of plural 
+  // forms. See http://developer.mozilla.org/en/docs/Localization_and_Plurals
+  // This is used inside the Style panel of the Inspector tool. For each style
+  // property the panel shows the number of rules which hold that specific
+  // property, counted from all of the stylesheet in the web page inspected.
+  "style.property.numberOfRules": "#1 rule;#1 rules",
+  
+  // LOCALIZATION NOTE (style.property.important): This is used inside
+  // the Style panel of the Inspector tool. For each style property the developer
+  // can mark it as important, or not. This string is displayed in the hover tool
+  // tip when the user is on top of a rule within a property view, if the CSS
+  // property is marked as important in that rule. Also note that this string is
+  // prepended to the style.rule.specificity string *if* the property is important.
+  "style.property.important": "!important,",
+  
+  // LOCALIZATION NOTE (style.rule.status): These strings are used inside the Style
+  // panel of the Inspector tool. For each style property the panel shows the rules
+  // which hold that specific property. For every rule, the rule status is also
+  // displayed: a rule can be the best match, a match, a parent match, or a rule
+  // did not match the element the user has highlighted.
+  "style.rule.status.BEST": "Best Match",
+  "style.rule.status.MATCHED": "Matched",
+  "style.rule.status.PARENT_MATCH": "Parent Match",
+  "style.rule.status.UNMATCHED": "Unmatched",
+  
+  // LOCALIZATION NOTE (style.rule.sourceElement, style.rule.sourceInline):
+  // These strings are used inside the Style panel of the Inspector tool. For each
+  // style property the panel shows the rules which hold that specific property.
+  // For every rule, the rule source is also displayed: a rule can come from a
+  // file, from the same page (inline), or from the element itself (element).
+  "style.rule.sourceInline": "inline",
+  "style.rule.sourceElement": "element",
+  
+  // LOCALIZATION NOTE (style.rule.showUnmatchedLink): Semi-colon list of plural
+  // forms. See http://developer.mozilla.org/en/docs/Localization_and_Plurals
+  // This is used inside the Style panel of the Inspector tool. Each style property
+  // is inside a rule. A rule is a selector that can match (or not) the highlighted
+  // element in the web page. The property view shows only a few of the unmatched
+  // rules. If the user wants to see all of the unmatched rules, he/she must click
+  // the link displayed at the bottom of the rules table. That link shows how many
+  // rules are not displayed. This is the string used when the link is generated.
+  "style.rule.showUnmatchedLink": "One unmatched rule...;#1 unmatched rules...",
+  
+  // LOCALIZATION NOTE (style.elementSelector): This is used inside the Style panel
+  // of the Inspector tool. For each property the panel shows the rule with its
+  // selector. Rules can come from element.style. In this case, one can translate
+  // element.style to the local language.
+  "style.elementSelector": "element.style",
+  
+  // LOCALIZATION NOTE (style.group): These strings are used inside the Style panel
+  // of the Inspector tool. Style properties are displayed in groups and these are
+  // the group names.
+  "style.group.Text_Fonts_and_Color": "Text, Fonts & Color",
+  "style.group.Background": "Background",
+  "style.group.Dimensions": "Dimensions",
+  "style.group.Positioning_and_Page_Flow": "Positioning and Page Flow",
+  "style.group.Borders": "Borders",
+  "style.group.Lists": "Lists",
+  "style.group.Effects_and_Other": "Effects and Other"
+};
+
+/**
+ * This is effectively the main()
+ */
+window.onload = function() {
+  console.log("loaded");
+  var cssHtmlTree = new CssHtmlTree();
+};
