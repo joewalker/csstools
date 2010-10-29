@@ -41,8 +41,8 @@ To visually debug the templates without running firefox, alter the display:none
       <xul:menulist _id="sheetList" label="&style.displaySheetLabel;"
           oncommand="${sheetChange}"
         ><xul:menupopup
-          ><xul:menuitem foreach="sheet in ${cssLogic.sheets}"
-              value="${sheet.href}" label="${sheet.shortSource}"
+          ><xul:menuitem foreach="sheet in ${sheets}"
+              value="${sheet.getHref()}" label="${sheet.getShortSource()}"
           /><xul:menuitem value="all" label="&style.displayAllSheets;"
           /><xul:menuitem value="ua" label="&style.displayBrowserSheets;"
         /></xul:menupopup
@@ -106,22 +106,24 @@ To visually debug the templates without running firefox, alter the display:none
   using a div a the parent causes the DOM to muck with the tr elements
   -->
   <table id="templateRules">
-    <loop foreach="selector in ${selectorViews}" if="${selector.selectorInfo.sheetAllowed}">
+    <loop foreach="selector in ${selectorViews}"
+        if="${selector.selectorInfo.getSheetAllowed()}">
       <tr>
         <td class="rule-text status${selector.selectorInfo.status}">
           ${selector.text(__element)}
         </td>
         <td class="rule-value">${selector.selectorInfo.value}</td>
         <td class="rule-link">
-          <a target="_blank" class="link"
-              href="view-source:${selector.selectorInfo.href}"
-              title="${selector.selectorInfo.href}">${selector.selectorInfo.source}</a>
+          <a target="_blank" title="${selector.selectorInfo.getHref()}"
+              href="view-source:${selector.selectorInfo.getHref()}"
+              class="link">${selector.selectorInfo.source}</a>
         </td>
       </tr>
       <tr class="rule-score">
         <td colspan="2">
           <span title="${selector.specificityTitle}">
-            Score: ${selector.selectorInfo.specificityScore} Status: ${selector.statusText}
+            Score: ${selector.selectorInfo.specificityScore}
+            Status: ${selector.statusText}
           </span>
         </td>
       </tr>

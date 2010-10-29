@@ -104,6 +104,7 @@ CssHtmlTree.prototype = {
 
     if (this.viewedElement) {
       this.viewedDocument = this.viewedElement.ownerDocument;
+      this.sheets = this.cssLogic.getSheets();
       CssHtmlTree.template(this.templateRoot, this.root, this);
 
       this.specificityInput.checked = this.showSpecificity;
@@ -111,7 +112,7 @@ CssHtmlTree.prototype = {
       // Update the web page to display the selected source filter.
       let sheetList = this.styleDocument.getElementById("sheetList");
       let sheetItem = null;
-      let sourceFilter = this.cssLogic.sourceFilter;
+      let sourceFilter = this.cssLogic.getSourceFilter();
       for (let i = 0; i < sheetList.itemCount; i++) {
         sheetItem = sheetList.getItemAtIndex(i);
         if (sheetItem && sheetItem.value === sourceFilter) {
@@ -157,11 +158,11 @@ CssHtmlTree.prototype = {
    */
   sheetChange: function CssHtmlTree_sheetChange(aEvent) {
     let target = aEvent.target;
-    if (target.value === this.cssLogic.sourceFilter) {
+    if (target.value === this.cssLogic.getSourceFilter()) {
       return;
     }
 
-    this.cssLogic.sourceFilter = target.value;
+    this.cssLogic.setSourceFilter(target.value);
 
     this.highlight(this.viewedElement);
   },
@@ -493,7 +494,6 @@ function PropertyView(aTree, aGroup, aName)
 PropertyView.prototype = {
   /**
    * The click event handler for the property name of the property view
-   *
    * @param {Event} aEvent the DOM event
    */
   click: function PropertyView_click(aEvent)
@@ -519,7 +519,6 @@ PropertyView.prototype = {
 
   /**
    * Get the computed style for the current property.
-   *
    * @return {string} the computed style for the current property of the
    * currently highlighted element.
    */
@@ -539,7 +538,6 @@ PropertyView.prototype = {
   /**
    * Compute the title of the property view. The title includes the number of
    * rules that hold the current property.
-   *
    * @param {nsIDOMElement} aElement reference to the DOM element where the rule
    * title needs to be displayed.
    * @return {string} The rule title.
@@ -637,7 +635,6 @@ PropertyView.prototype = {
 function SelectorView(aSelectorInfo)
 {
   this.selectorInfo = aSelectorInfo;
-
   this._cacheStatusNames();
 }
 
