@@ -1,6 +1,16 @@
 
 (function(global) {
   /**
+   * Control output verboseness. The default is SILENT
+   */
+  let Level = {
+    SILENT: 0,  // No output at all
+    ERROR: 1,   // Output when something is obviously broken
+    WARNING: 2, // Output when something might be broken
+    DEBUG: 3    // Output to say what's going on
+  };
+
+  /**
    * We invent a unique ID for each function call.
    * At some point this is going to overflow, however I suspect that the sun
    * will burn out first. TODO: Compare expected overflow time with sun age.
@@ -12,6 +22,11 @@
    * This could be a handy place to do debugging
    */
   let calls = [];
+
+  /**
+   * By default we console.log on error
+   */
+  let logLevel = Level.SILENT;
 
   /**
    * A function to be called by the functions in a proxy to do the actual
@@ -32,6 +47,12 @@
       },
     };
     calls[callId] = call;
+
+    if (logLevel >= Level.DEBUG) {
+      console.log("Call " + callId + ": " + scopeName + "." + funcName +
+          "(" + args.join(",") + ")");
+    }
+
     postMessage(call.data);
   };
 
@@ -41,19 +62,47 @@
   global.on('message', function(data) {
     let call = calls[data.callId];
     if (!call) {
-      console.error("Dropping reply, not callId " + data.callId);
+      if (logLevel >= Level.ERROR) {
+        console.error("Dropping reply, invalid callId " + data.callId);
+      }
       return;
     }
     delete calls[data.callId];
 
     // Call the callback if there was send data
-    if ("reply" in data && call.options.callback) {
-      call.options.callback.apply(call.options.scope, [ data.reply ]);
+    if ("reply" in data) {
+      if (logLevel >= Level.DEBUG) {
+        console.log("Reply " + call.data.callId + ": " + call.data.scopeName +
+            "." + call.data.funcName + "(" + data.reply + ")");
+      }
+
+      if (call.options.callback) {
+        call.options.callback.apply(call.options.scope, [ data.reply ]);
+      }
+      else {
+        if (logLevel >= Level.WARNING) {
+          console.warn("Ignored return value. Missing callback.");
+        }
+      }
     }
-    // Call the errback (error handler) if there was an exception
-    if ("exception" in data && call.options.errback) {
-      call.options.errback.apply(call.options.scope, [ data.exception ]);
+    else {
+      // Call the errback (error handler) if there was an exception
+      if (logLevel >= Level.WARNING) {
+        console.warn("Exception calling " + call.data.funcName + " - " +
+            data.exception);
+        console.warn(JSON.stringify(data.exception));
+      }
+
+      if (call.options.errback) {
+        call.options.errback.apply(call.options.scope, [ data.exception ]);
+      }
+      else {
+        if (logLevel >= Level.WARNING) {
+          console.warn("Ignored exception. Missing errback.");
+        }
+      }
     }
+
     // Call a finally whatever to allow clearing up
     if (call.options.finback) {
       call.options.finback.apply(call.options.scope);
@@ -78,7 +127,13 @@
           }
         }
       });
-    }
+    },
+    
+    set logLevel(aLogLevel) {
+      logLevel = aLogLevel;
+    },
+
+    Level: Level
   };
 })(this);
 

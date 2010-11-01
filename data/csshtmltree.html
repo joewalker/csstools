@@ -20,6 +20,8 @@ To visually debug the templates without running firefox, alter the display:none
   -->
   <div id="templateRoot">
     <div _id="groups">
+      <!-- TODO: using a custom open attr is a bit nasty but it fits with the
+      XUL way of doing things. Should we 'class'ify this? -->
       <div foreach="group in ${styleGroups}" class="group" open="false"
             save="${group.element}">
         <h1 onclick="${group.click}">${group.localName}</h1>
@@ -32,7 +34,7 @@ To visually debug the templates without running firefox, alter the display:none
   A templateProperties sits inside each templateGroups to show the properties
   themselves. Each needs data like this:
   {
-    property: [ ..., ] // Array of PropertyViews from csshtmltree.js
+    propertyViews: [ ..., ] // Array of PropertyViews from csshtmltree.js
   }
   -->
   <div id="templateProperties">

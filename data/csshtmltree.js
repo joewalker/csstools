@@ -21,7 +21,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Joe Walker (jwalker@mozilla.com) (original author)
+ *   Joe Walker <jwalker@mozilla.com> (original author)
  *   Mihai Șucan <mihai.sucan@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
@@ -46,167 +46,166 @@
  */
 function CssHtmlTree()
 {
-  this.cssLogic = proxier.require("cssLogic");
+  if (!(this instanceof CssHtmlTree)) {
+    return new CssHtmlTree();
+  }
 
-  // Nodes used in templating
-  this.root = document.getElementById("root");
-  this.templateRoot = document.getElementById("templateRoot");
-
-  this.createStyleGroupViews();
-  CssHtmlTree.template(this.templateRoot, this.root, this);
+  this.styleGroups = CssHtmlTree.createStyleGroupViews();
+  CssHtmlTree.template("templateRoot", "root", this);
 };
 
-CssHtmlTree.prototype = {
-  /**
-   * The CSS groups as displayed by the UI.
-   */
-  createStyleGroupViews: function CssHtmlTree_createStyleGroupViews()
-  {
-    // These group titles are localized by their ID. See the
-    // inspector.properties file.
-    this.styleGroups = [
-      new StyleGroupView(this, "Text_Fonts_and_Color", [
-        "color",
-        "direction",
-        "font-family",
-        "font-size",
-        "font-size-adjust",
-        "font-stretch",
-        "font-style",
-        "font-variant",
-        "font-weight",
-        "letter-spacing",
-        "line-height",
-        "quotes",
-        "text-align",
-        "text-decoration",
-        "text-indent",
-        "text-rendering",
-        "text-shadow",
-        "text-transform",
-        "vertical-align",
-        "white-space",
-        "word-spacing",
-        "word-wrap",
-        "-moz-column-count",
-        "-moz-column-gap",
-        "-moz-column-rule-color",
-        "-moz-column-rule-style",
-        "-moz-column-rule-width",
-        "-moz-column-width",
-      ]),
+proxier.logLevel = proxier.Level.DEBUG;
+CssHtmlTree.cssLogic = proxier.require("cssLogic");
 
-      new StyleGroupView(this, "Lists", [
-        "list-style-image",
-        "list-style-position",
-        "list-style-type",
-      ]),
+/**
+ * The CSS groups as displayed by the UI.
+ */
+CssHtmlTree.createStyleGroupViews = function CssHtmlTree_createStyleGroupViews()
+{
+  // These group titles are localized by their ID. See the
+  // inspector.properties file.
+  return [
+    new StyleGroupView("Text_Fonts_and_Color", [
+      "color",
+      "direction",
+      "font-family",
+      "font-size",
+      "font-size-adjust",
+      "font-stretch",
+      "font-style",
+      "font-variant",
+      "font-weight",
+      "letter-spacing",
+      "line-height",
+      "quotes",
+      "text-align",
+      "text-decoration",
+      "text-indent",
+      "text-rendering",
+      "text-shadow",
+      "text-transform",
+      "vertical-align",
+      "white-space",
+      "word-spacing",
+      "word-wrap",
+      "-moz-column-count",
+      "-moz-column-gap",
+      "-moz-column-rule-color",
+      "-moz-column-rule-style",
+      "-moz-column-rule-width",
+      "-moz-column-width",
+    ]),
 
-      new StyleGroupView(this, "Background", [
-        "background-attachment",
-        "background-clip",
-        "background-color",
-        "background-image",
-        "background-origin",
-        "background-position",
-        "background-repeat",
-        "background-size",
-      ]),
+    new StyleGroupView("Lists", [
+      "list-style-image",
+      "list-style-position",
+      "list-style-type",
+    ]),
 
-      new StyleGroupView(this, "Dimensions", [
-        "width",
-        "height",
-        "max-width",
-        "max-height",
-        "min-width",
-        "min-height",
-        "margin-top",
-        "margin-right",
-        "margin-bottom",
-        "margin-left",
-        "padding-top",
-        "padding-right",
-        "padding-bottom",
-        "padding-left",
-        "clip",
-        "resize",
-        "-moz-box-sizing",
-      ]),
+    new StyleGroupView("Background", [
+      "background-attachment",
+      "background-clip",
+      "background-color",
+      "background-image",
+      "background-origin",
+      "background-position",
+      "background-repeat",
+      "background-size",
+    ]),
 
-      new StyleGroupView(this, "Positioning_and_Page_Flow", [
-        "top",
-        "right",
-        "bottom",
-        "left",
-        "display",
-        "float",
-        "clear",
-        "position",
-        "visibility",
-        "overflow-x",
-        "overflow-y",
-        "z-index",
-      ]),
+    new StyleGroupView("Dimensions", [
+      "width",
+      "height",
+      "max-width",
+      "max-height",
+      "min-width",
+      "min-height",
+      "margin-top",
+      "margin-right",
+      "margin-bottom",
+      "margin-left",
+      "padding-top",
+      "padding-right",
+      "padding-bottom",
+      "padding-left",
+      "clip",
+      "resize",
+      "-moz-box-sizing",
+    ]),
 
-      new StyleGroupView(this, "Borders", [
-        "border-top-width",
-        "border-right-width",
-        "border-bottom-width",
-        "border-left-width",
-        "border-top-color",
-        "border-right-color",
-        "border-bottom-color",
-        "border-left-color",
-        "border-top-style",
-        "border-right-style",
-        "border-bottom-style",
-        "border-left-style",
-        "border-collapse",
-        "border-spacing",
-        "outline-top-width",
-        "outline-right-width",
-        "outline-bottom-width",
-        "outline-left-width",
-        "outline-top-color",
-        "outline-right-color",
-        "outline-bottom-color",
-        "outline-left-color",
-        "outline-top-style",
-        "outline-right-style",
-        "outline-bottom-style",
-        "outline-left-style",
-        "outline-offset",
-        "-moz-border-radius-topleft",
-        "-moz-border-radius-topright",
-        "-moz-border-radius-bottomright",
-        "-moz-border-radius-bottomleft",
-        "-moz-outline-radius-topleft",
-        "-moz-outline-radius-topright",
-        "-moz-outline-radius-bottomright",
-        "-moz-outline-radius-bottomleft",
-      ]),
+    new StyleGroupView("Positioning_and_Page_Flow", [
+      "top",
+      "right",
+      "bottom",
+      "left",
+      "display",
+      "float",
+      "clear",
+      "position",
+      "visibility",
+      "overflow-x",
+      "overflow-y",
+      "z-index",
+    ]),
 
-      new StyleGroupView(this, "Effects_and_Other", [
-        "caption-side",
-        "content",
-        "counter-increment",
-        "counter-reset",
-        "cursor",
-        "empty-cells",
-        "image-rendering",
-        "opacity",
-        "pointer-events",
-        "table-layout",
-        "box-shadow",
-        "-moz-transform",
-        "-moz-transition",
-        "-moz-user-focus",
-        "-moz-user-input",
-        "-moz-user-modify",
-        "-moz-user-select",
-      ]),
-    ];
-  },
+    new StyleGroupView("Borders", [
+      "border-top-width",
+      "border-right-width",
+      "border-bottom-width",
+      "border-left-width",
+      "border-top-color",
+      "border-right-color",
+      "border-bottom-color",
+      "border-left-color",
+      "border-top-style",
+      "border-right-style",
+      "border-bottom-style",
+      "border-left-style",
+      "border-collapse",
+      "border-spacing",
+      "outline-top-width",
+      "outline-right-width",
+      "outline-bottom-width",
+      "outline-left-width",
+      "outline-top-color",
+      "outline-right-color",
+      "outline-bottom-color",
+      "outline-left-color",
+      "outline-top-style",
+      "outline-right-style",
+      "outline-bottom-style",
+      "outline-left-style",
+      "outline-offset",
+      "-moz-border-radius-topleft",
+      "-moz-border-radius-topright",
+      "-moz-border-radius-bottomright",
+      "-moz-border-radius-bottomleft",
+      "-moz-outline-radius-topleft",
+      "-moz-outline-radius-topright",
+      "-moz-outline-radius-bottomright",
+      "-moz-outline-radius-bottomleft",
+    ]),
+
+    new StyleGroupView("Effects_and_Other", [
+      "caption-side",
+      "content",
+      "counter-increment",
+      "counter-reset",
+      "cursor",
+      "empty-cells",
+      "image-rendering",
+      "opacity",
+      "pointer-events",
+      "table-layout",
+      "box-shadow",
+      "-moz-transform",
+      "-moz-transition",
+      "-moz-user-focus",
+      "-moz-user-input",
+      "-moz-user-modify",
+      "-moz-user-select",
+    ]),
+  ];
 };
 
 /**
@@ -217,6 +216,12 @@ CssHtmlTree.prototype = {
 CssHtmlTree.l10n = function CssHtmlTree_l10n(aName)
 {
   return l10nLookup[aName];
+};
+
+CssHtmlTree.pluralFormGetReplace = function CssHtmlTree_pfGR(aStr, aCount)
+{
+  return aStr.split(";")[0].replace("#1", aCount);
+  // return PluralForm.get(aCount, aStr).replace("#1", aCount);
 };
 
 /**
@@ -230,6 +235,13 @@ CssHtmlTree.l10n = function CssHtmlTree_l10n(aName)
  */
 CssHtmlTree.template = function CssHtmlTree_template(aTemplate, aDestination, aData)
 {
+  if (typeof aDestination === 'string') {
+    aDestination = document.getElementById(aDestination);
+  }
+  if (typeof aTemplate === 'string') {
+    aTemplate = document.getElementById(aTemplate);
+  }
+
   aDestination.innerHTML = "";
 
   // All the templater does is to populate a given DOM tree with the given
@@ -245,34 +257,24 @@ CssHtmlTree.template = function CssHtmlTree_template(aTemplate, aDestination, aD
 //#############################################################################
 
 /**
- * A container to give easy access to style group data from the template engine.
- *
- * @constructor
- * @param {CssHtmlTree} aTree the instance of the CssHtmlTree object that we are
- * working with.
- * @param {string} aId the style group ID.
+ * A container to give easy access to style group data from the template engine
+ * @param {string} aId the style group ID
  * @param {array} aPropertyNames the list of property names associated to this
- * style group view.
+ * style group view
+ * @constructor
  */
-function StyleGroupView(aTree, aId, aPropertyNames)
+function StyleGroupView(aId, aPropertyNames)
 {
-  this.tree = aTree;
   this.id = aId;
+  this.propertyNames = aPropertyNames;
   this.localName = CssHtmlTree.l10n("style.group." + this.id);
 
-  this.propertyViews = [];
-  aPropertyNames.forEach(function(aPropertyName) {
-    this.propertyViews.push(new PropertyView(this.tree, this, aPropertyName));
-  }, this);
-
   this.populated = false;
+  this.populating = false;
 
-  this.templateProperties = document.getElementById("templateProperties");
-
-  // Populated by templater: parent element containing the open attribute
-  this.element = null;
-  // Destination for templateProperties.
-  this.properties = null;
+  // Populated by Templater:
+  this.element = null;    // parent element containing the open attribute
+  this.properties = null; // destination for templateProperties
 }
 
 StyleGroupView.prototype = {
@@ -288,74 +290,53 @@ StyleGroupView.prototype = {
     }
 
     if (!this.populated) {
-      CssHtmlTree.template(this.templateProperties, this.properties, this);
-      this.populated = true;
+      if (this.populating) {
+        return;
+      }
+
+      this.populating = true;
+      CssHtmlTree.cssLogic.getPropertyInfos(this.propertyNames, function(aPropertyInfos) {
+        this.propertyViews = [];
+        for (let i = 0; i < this.propertyNames.length; i++) {
+          let propertyView = new PropertyView(this,
+                    this.propertyNames[i],
+                    aPropertyInfos[i]);
+          this.propertyViews.push(propertyView);
+        }
+
+        CssHtmlTree.template("templateProperties", this.properties, this);
+        this.populated = true;
+        this.populating = false;
+      }.bind(this));
     }
 
     this.element.setAttribute("open", "true");
-  },
-
-  /**
-   * Close the style group view.
-   */
-  close: function StyleGroupView_close()
-  {
-    this.element.setAttribute("open", "false");
-  },
-
-  /**
-   * Reset the style group view and its property views.
-   *
-   * @param {boolean} aClosePanel tells if the style panel is closing or not.
-   */
-  reset: function StyleGroupView_reset(aClosePanel)
-  {
-    this.close();
-    this.populated = false;
-    for (let i = 0, n = this.propertyViews.length; i < n; i++) {
-      this.propertyViews[i].reset();
-    }
-
-    if (this.properties) {
-      if (aClosePanel) {
-        this.element.removeChild(this.properties);
-        this.properties = null;
-      } else {
-        while (this.properties.hasChildNodes()) {
-          this.properties.removeChild(this.properties.firstChild);
-        }
-      }
-    }
-  },
+  }
 };
 
 /**
- * A container to give easy access to property data from the template engine.
- *
- * @constructor
- * @param {CssHtmlTree} aTree the CssHtmlTree instance we are working with.
+ * A container to give easy access to property data from the template engine
  * @param {StyleGroupView} aGroup the StyleGroupView instance we are working
  * with.
  * @param {string} aName the CSS property name for which this PropertyView
  * instance will render the rules.
+ * @constructor
  */
-function PropertyView(aTree, aGroup, aName)
+function PropertyView(aGroup, aName, aPropertyInfo)
 {
-  this.tree = aTree;
   this.group = aGroup;
   this.name = aName;
+  this.propertyInfo = aPropertyInfo;
+  this.value = this.propertyInfo.value;
 
   this.populated = false;
   this.showUnmatched = false;
 
   this.link = "https://developer.mozilla.org/en/CSS/" + aName;
 
-  this.templateRules = document.getElementById("templateRules");
-
-  // The parent element which contains the open attribute
-  this.element = null;
-  // Destination for templateRules.
-  this.rules = null;
+  // Populated by Templater:  
+  this.element = null; // The parent element which contains the open attribute
+  this.rules = null;   // Destination for templateRules.
 
   this.str = {};
 };
@@ -363,7 +344,6 @@ function PropertyView(aTree, aGroup, aName)
 PropertyView.prototype = {
   /**
    * The click event handler for the property name of the property view
-   *
    * @param {Event} aEvent the DOM event
    */
   click: function PropertyView_click(aEvent)
@@ -380,7 +360,7 @@ PropertyView.prototype = {
     }
 
     if (!this.populated) {
-      CssHtmlTree.template(this.templateRules, this.rules, this);
+      CssHtmlTree.template("templateRules", this.rules, this);
       this.populated = true;
     }
 
@@ -388,28 +368,8 @@ PropertyView.prototype = {
   },
 
   /**
-   * Get the computed style for the current property.
-   *
-   * @return {string} the computed style for the current property of the
-   * currently highlighted element.
-   */
-  get value()
-  {
-    return this.propertyInfo.value;
-  },
-
-  /**
-   * An easy way to access the CssPropertyInfo behind this PropertyView
-   */
-  get propertyInfo()
-  {
-    return this.tree.cssLogic.getPropertyInfo(this.name);
-  },
-
-  /**
-   * Compute the title of the property view. The title includes the number of
-   * rules that hold the current property.
-   *
+   * Compute the title of the property view.
+   * The title includes the number of rules that hold the current property.
    * @param {nsIDOMElement} aElement reference to the DOM element where the rule
    * title needs to be displayed.
    * @return {string} The rule title.
@@ -423,30 +383,10 @@ PropertyView.prototype = {
       aElement.classList.add("rule-count");
 
       let str = CssHtmlTree.l10n("style.property.numberOfRules");
-      result = PluralForm.get(ruleCount, str).replace("#1", ruleCount);
+      result = CssHtmlTree.pluralFormGetReplace(str, ruleCount);
     }
 
     return result;
-  },
-
-  /**
-   * Close the property view.
-   */
-  close: function PropertyView_close()
-  {
-    if (this.rules) {
-      this.element.setAttribute("open", "false");
-    }
-  },
-
-  /**
-   * Reset the property view.
-   */
-  reset: function PropertyView_reset()
-  {
-    this.close();
-    this.populated = false;
-    this.element = false;
   },
 
   /**
@@ -485,8 +425,7 @@ PropertyView.prototype = {
   get showUnmatchedLinkText()
   {
     let smur = CssHtmlTree.l10n("style.rule.showUnmatchedLink");
-    let plural = PluralForm.get(this.propertyInfo.unmatchedRuleCount, smur)
-    return plural.replace("#1", this.propertyInfo.unmatchedRuleCount);
+    return CssHtmlTree.pluralFormGetReplace(smur, this.propertyInfo.unmatchedRuleCount)
   },
 
   /**
@@ -495,7 +434,7 @@ PropertyView.prototype = {
   showUnmatchedLinkClick: function(aEvent)
   {
     this.showUnmatched = true;
-    CssHtmlTree.template(this.templateRules, this.rules, this);
+    CssHtmlTree.template("templateRules", this.rules, this);
 
     aEvent.preventDefault();
   },
@@ -612,14 +551,6 @@ let l10nLookup = {
   "style.rule.status.PARENT_MATCH": "Parent Match",
   "style.rule.status.UNMATCHED": "Unmatched",
   
-  // LOCALIZATION NOTE (style.rule.sourceElement, style.rule.sourceInline):
-  // These strings are used inside the Style panel of the Inspector tool. For each
-  // style property the panel shows the rules which hold that specific property.
-  // For every rule, the rule source is also displayed: a rule can come from a
-  // file, from the same page (inline), or from the element itself (element).
-  "style.rule.sourceInline": "inline",
-  "style.rule.sourceElement": "element",
-  
   // LOCALIZATION NOTE (style.rule.showUnmatchedLink): Semi-colon list of plural
   // forms. See http://developer.mozilla.org/en/docs/Localization_and_Plurals
   // This is used inside the Style panel of the Inspector tool. Each style property
@@ -652,6 +583,10 @@ let l10nLookup = {
  * This is effectively the main()
  */
 window.onload = function() {
-  console.log("loaded");
-  var cssHtmlTree = new CssHtmlTree();
+  try {
+    new CssHtmlTree();
+  }
+  catch (ex) {
+    console.error(ex);
+  }
 };
