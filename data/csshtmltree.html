@@ -47,29 +47,22 @@ To visually debug the templates without running firefox, alter the display:none
               title="Read the docs for this property">${property.name}</a>
         </span>
         <span class="property-value">${property.value}</span>
-        <span class="link">${property.ruleTitle(__element)}</span>
+        <span class="rule-count link">${property.matchesTitle}</span>
       </div>
       <table class="rules" save="${property.rules}"></table>
     </div>
   </div>
 
   <!--
-  A templateRules sits inside each templateProperties showing the list of rules
-  that affect that property. Each needs data like this:
-  {
-    selectorViews: ..., // from cssLogic.getPropertyInfo(x).[un]matchedSelectors
-    statusText: function(status) {}, // convert rule.status to readable text
-    showUnmatchedRules: true / false, // show a "more unmatched rules" link
-    showUnmatchedRulesClick: function() {}, // click event handler for the
-        "show more unmatched rules"
-  }
+  A templateRules sits inside each templateProperties showing the list of the
+  selectors that affect the property. Each needs data an object containing
+  a selectorViews property which is an array of SelectorViews
   This is a template so the parent does not need to be a table, except that
   using a div a the parent causes the DOM to muck with the tr elements
   -->
   <table id="templateRules">
-    <tr foreach="selector in ${selectorViews}"
-        if="${selector.selectorInfo.sheetAllowed}">
-      <td class="rule-text status${selector.selectorInfo.status}">
+    <tr foreach="selector in ${selectorViews}">
+      <td class="rule-text status${selector.status}">
         ${selector.text(__element)}
       </td>
       <td class="rule-value">${selector.selectorInfo.value}</td>
@@ -79,7 +72,7 @@ To visually debug the templates without running firefox, alter the display:none
             class="link">${selector.selectorInfo.source}</a>
       </td>
     </tr>
-    <tr if="${showUnmatchedLink}">
+    <tr if="${showUnmatched}">
       <td colspan="4">
         <a href="#" onclick="${showUnmatchedLinkClick}"
             class="link">${showUnmatchedLinkText}</a>

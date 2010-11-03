@@ -55,7 +55,20 @@ function CssHtmlTree()
 };
 
 proxier.logLevel = proxier.Level.DEBUG;
-CssHtmlTree.cssLogic = proxier.require("cssLogic");
+CssHtmlTree.styleLogic = proxier.require("styleLogic");
+
+/**
+ * TODO: what's the best way of extracting constants across e10s?
+ */
+let CssLogic = {
+  STATUS: {
+    BEST: 3,
+    MATCHED: 2,
+    PARENT_MATCH: 1,
+    UNMATCHED: 0,
+    UNKNOWN: -1,
+  }
+};
 
 /**
  * The CSS groups as displayed by the UI.
@@ -295,13 +308,12 @@ StyleGroupView.prototype = {
       }
 
       this.populating = true;
-      CssHtmlTree.cssLogic.getPropertyInfos(this.propertyNames, function(aPropertyInfos) {
+      CssHtmlTree.styleLogic.getPropertyInfo(this.propertyNames, function(aPropertyInfos) {
         this.propertyViews = [];
         for (let i = 0; i < this.propertyNames.length; i++) {
-          let propertyView = new PropertyView(this,
-                    this.propertyNames[i],
-                    aPropertyInfos[i]);
-          this.propertyViews.push(propertyView);
+          let name = this.propertyNames[i];
+          let info = aPropertyInfos[i];
+          this.propertyViews.push(new PropertyView(name, info));
         }
 
         CssHtmlTree.template("templateProperties", this.properties, this);
@@ -316,29 +328,32 @@ StyleGroupView.prototype = {
 
 /**
  * A container to give easy access to property data from the template engine
- * @param {StyleGroupView} aGroup the StyleGroupView instance we are working
- * with.
  * @param {string} aName the CSS property name for which this PropertyView
  * instance will render the rules.
  * @constructor
  */
-function PropertyView(aGroup, aName, aPropertyInfo)
+function PropertyView(aName, aPropertyInfo)
 {
-  this.group = aGroup;
   this.name = aName;
   this.propertyInfo = aPropertyInfo;
   this.value = this.propertyInfo.value;
 
-  this.populated = false;
+  this.populatedMatched = false;
+  this.populatedUnmatched = false;
+  this.populating = false;
   this.showUnmatched = false;
 
   this.link = "https://developer.mozilla.org/en/CSS/" + aName;
 
-  // Populated by Templater:  
-  this.element = null; // The parent element which contains the open attribute
-  this.rules = null;   // Destination for templateRules.
+  this.matchesTitle = (this.propertyInfo.matchedRuleCount === 0) ?
+      "" :
+      CssHtmlTree.pluralFormGetReplace(
+          CssHtmlTree.l10n("style.property.numberOfRules"),
+          this.propertyInfo.matchedRuleCount);
 
-  this.str = {};
+  // Populated by Templater:  
+  this.element = null; // Element which contains the 'open' attribute
+  this.rules = null;   // Destination for templateRules.
 };
 
 PropertyView.prototype = {
@@ -359,82 +374,75 @@ PropertyView.prototype = {
       return;
     }
 
-    if (!this.populated) {
-      CssHtmlTree.template("templateRules", this.rules, this);
-      this.populated = true;
+    if (!this.populatedMatched) {
+      if (this.populating) {
+        return;
+      }
+
+      this.populating = true;
+      CssHtmlTree.styleLogic.getSelectors(this.name, true, function(aSelectors) {
+        this.matchedSelectors = aSelectors;
+        CssHtmlTree.template("templateRules", this.rules, this);
+
+        this.populatedMatched = true;
+        this.populating = false;
+      }.bind(this));
     }
 
     this.element.setAttribute("open", "true");
   },
 
   /**
-   * Compute the title of the property view.
-   * The title includes the number of rules that hold the current property.
-   * @param {nsIDOMElement} aElement reference to the DOM element where the rule
-   * title needs to be displayed.
-   * @return {string} The rule title.
-   */
-  ruleTitle: function PropertyView_ruleTitle(aElement)
-  {
-    let result = "";
-    let ruleCount = this.propertyInfo.matchedRuleCount;
-
-    if (ruleCount > 0) {
-      aElement.classList.add("rule-count");
-
-      let str = CssHtmlTree.l10n("style.property.numberOfRules");
-      result = CssHtmlTree.pluralFormGetReplace(str, ruleCount);
-    }
-
-    return result;
-  },
-
-  /**
-   * Provide access to the SelectorViews that we are currently displaying
+   * Provide access to the SelectorViews that we are currently displaying.
+   * A getter because it will not be displayed until the user opens the toggle.
    */
   get selectorViews()
   {
-    var all = [];
+    let reply = [];
 
     function convert(aSelectorInfo) {
-      all.push(new SelectorView(aSelectorInfo));
+      reply.push(new SelectorView(aSelectorInfo));
     }
 
-    this.propertyInfo.matchedSelectors.forEach(convert);
+    this.matchedSelectors.forEach(convert);
     if (this.showUnmatched) {
-      this.propertyInfo.unmatchedSelectors.forEach(convert);
+      this.unmatchedSelectors.forEach(convert);
     }
 
-    return all;
-  },
-
-  /**
-   * Should we display a 'X unmatched rules' link?
-   * @return {boolean} false if we are already showing the unmatched links or
-   * if there are none to display, true otherwise.
-   */
-  get showUnmatchedLink()
-  {
-    return !this.showUnmatched && this.propertyInfo.unmatchedRuleCount > 0;
+    return reply;
   },
 
   /**
    * The UI has a link to allow the user to display unmatched selectors.
    * This provides localized link text.
+   * A getter because it will not be displayed until the user opens the toggle.
    */
   get showUnmatchedLinkText()
   {
-    let smur = CssHtmlTree.l10n("style.rule.showUnmatchedLink");
-    return CssHtmlTree.pluralFormGetReplace(smur, this.propertyInfo.unmatchedRuleCount)
+    return CssHtmlTree.l10n("style.rule.showUnmatchedLink");
   },
 
   /**
    * The action when a user clicks the 'show unmatched' link.
+   * A getter because it will not be displayed until the user opens the toggle.
    */
   showUnmatchedLinkClick: function(aEvent)
   {
-    this.showUnmatched = true;
-    CssHtmlTree.template("templateRules", this.rules, this);
+    if (!this.populatedUnmatched) {
+      if (this.populating) {
+        return;
+      }
+
+      this.populating = true;
+      CssHtmlTree.styleLogic.getSelectors(this.name, false, function(aSelectors) {
+        this.unmatchedSelectors = aSelectors;
+        this.showUnmatched = true;
+        CssHtmlTree.template("templateRules", this.rules, this);
+
+        this.populatedUnmatched = true;
+        this.populating = false;
+      }.bind(this));
+    }
 
     aEvent.preventDefault();
   },
@@ -551,15 +559,14 @@ let l10nLookup = {
   "style.rule.status.PARENT_MATCH": "Parent Match",
   "style.rule.status.UNMATCHED": "Unmatched",
   
-  // LOCALIZATION NOTE (style.rule.showUnmatchedLink): Semi-colon list of plural
-  // forms. See http://developer.mozilla.org/en/docs/Localization_and_Plurals
+  // LOCALIZATION NOTE (style.rule.showUnmatchedLink):
   // This is used inside the Style panel of the Inspector tool. Each style property
   // is inside a rule. A rule is a selector that can match (or not) the highlighted
   // element in the web page. The property view shows only a few of the unmatched
   // rules. If the user wants to see all of the unmatched rules, he/she must click
   // the link displayed at the bottom of the rules table. That link shows how many
   // rules are not displayed. This is the string used when the link is generated.
-  "style.rule.showUnmatchedLink": "One unmatched rule...;#1 unmatched rules...",
+  "style.rule.showUnmatchedLink": "Find unmatched rules ...",
   
   // LOCALIZATION NOTE (style.elementSelector): This is used inside the Style panel
   // of the Inspector tool. For each property the panel shows the rule with its

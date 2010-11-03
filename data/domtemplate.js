@@ -227,6 +227,9 @@ Templater.prototype.processForEach = function(node, data) {
           processAll('' + i, data);
         }, this);
       } else {
+        if (typeof reply === 'string') {
+          this.logError('Warning: looping using string: ' + reply);
+        }
         for (var param in reply) {
           if (reply.hasOwnProperty(param)) {
             processAll(param, param);
