@@ -89,7 +89,7 @@ Templater.prototype.processNode = function(node, data) {
             value = this.stripBraces(value);
             this.property(value, data, node);
             node.removeAttribute('save');
-          } else if (name.substring(0, 2) === 'on') {
+          } else if (name.substring(0, 2) === 'on' || name.substring(0, 3) === '_on') {
             // Event registration relies on property doing a bind
             value = this.stripBraces(value);
             var func = this.property(value, data);
@@ -98,10 +98,11 @@ Templater.prototype.processNode = function(node, data) {
                 ' to resolve to a function, but got ' + typeof func);
             }
             node.removeAttribute(name);
-            var capture = node.hasAttribute('capture' + name.substring(2));
-            node.addEventListener(name.substring(2), func, capture);
+            var event = name.substring(name.charAt(0) === "_" ? 3 : 2);
+            var capture = node.hasAttribute('capture' + event);
+            node.addEventListener(event, func, capture);
             if (capture) {
-              node.removeAttribute('capture' + name.substring(2));
+              node.removeAttribute('capture' + event);
             }
           } else {
             // Replace references in all other attributes

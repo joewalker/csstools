@@ -51,7 +51,16 @@ function CssHtmlTree()
   }
 
   this.styleGroups = CssHtmlTree.createStyleGroupViews();
-  CssHtmlTree.template("templateRoot", "root", this);
+
+  CssHtmlTree.template("templateInspector", "rootInspector", this);
+
+  CssHtmlTree.styleLogic.getSheets(function(aSheets) {
+    this.sheets = [];
+    aSheets.forEach(function(aSheet) {
+      this.sheets.push(new SheetView(aSheet));
+    }, this);
+    CssHtmlTree.template("templateDoctor", "rootDoctor", this);
+  }.bind(this));
 };
 
 proxier.logLevel = proxier.Level.DEBUG;
@@ -60,7 +69,7 @@ CssHtmlTree.styleLogic = proxier.require("styleLogic");
 /**
  * TODO: what's the best way of extracting constants across e10s?
  */
-let CssLogic = {
+var CssLogic = {
   STATUS: {
     BEST: 3,
     MATCHED: 2,
@@ -259,7 +268,7 @@ CssHtmlTree.template = function CssHtmlTree_template(aTemplate, aDestination, aD
 
   // All the templater does is to populate a given DOM tree with the given
   // values, so we need to clone the template first.
-  let duplicated = aTemplate.cloneNode(true);
+  var duplicated = aTemplate.cloneNode(true);
   new Templater().processNode(duplicated, aData);
   while (duplicated.firstChild) {
     aDestination.appendChild(duplicated.firstChild);
@@ -267,7 +276,7 @@ CssHtmlTree.template = function CssHtmlTree_template(aTemplate, aDestination, aD
 };
 
 
-//#############################################################################
+//##############################################################################
 
 /**
  * A container to give easy access to style group data from the template engine
@@ -310,9 +319,9 @@ StyleGroupView.prototype = {
       this.populating = true;
       CssHtmlTree.styleLogic.getPropertyInfo(this.propertyNames, function(aPropertyInfos) {
         this.propertyViews = [];
-        for (let i = 0; i < this.propertyNames.length; i++) {
-          let name = this.propertyNames[i];
-          let info = aPropertyInfos[i];
+        for (var i = 0; i < this.propertyNames.length; i++) {
+          var name = this.propertyNames[i];
+          var info = aPropertyInfos[i];
           this.propertyViews.push(new PropertyView(name, info));
         }
 
@@ -325,6 +334,9 @@ StyleGroupView.prototype = {
     this.element.setAttribute("open", "true");
   }
 };
+
+
+//##############################################################################
 
 /**
  * A container to give easy access to property data from the template engine
@@ -352,8 +364,8 @@ function PropertyView(aName, aPropertyInfo)
           this.propertyInfo.matchedRuleCount);
 
   // Populated by Templater:  
-  this.element = null; // Element which contains the 'open' attribute
-  this.rules = null;   // Destination for templateRules.
+  this.element = null;      // Element which contains the 'open' attribute
+  this.selectorsEle = null; // Destination for templateSelectors.
 };
 
 PropertyView.prototype = {
@@ -382,7 +394,7 @@ PropertyView.prototype = {
       this.populating = true;
       CssHtmlTree.styleLogic.getSelectors(this.name, true, function(aSelectors) {
         this.matchedSelectors = aSelectors;
-        CssHtmlTree.template("templateRules", this.rules, this);
+        CssHtmlTree.template("templateSelectors", this.selectorsEle, this);
 
         this.populatedMatched = true;
         this.populating = false;
@@ -398,7 +410,7 @@ PropertyView.prototype = {
    */
   get selectorViews()
   {
-    let reply = [];
+    var reply = [];
 
     function convert(aSelectorInfo) {
       reply.push(new SelectorView(aSelectorInfo));
@@ -437,7 +449,7 @@ PropertyView.prototype = {
       CssHtmlTree.styleLogic.getSelectors(this.name, false, function(aSelectors) {
         this.unmatchedSelectors = aSelectors;
         this.showUnmatched = true;
-        CssHtmlTree.template("templateRules", this.rules, this);
+        CssHtmlTree.template("templateSelectors", this.selectorsEle, this);
 
         this.populatedUnmatched = true;
         this.populating = false;
@@ -448,32 +460,31 @@ PropertyView.prototype = {
   },
 };
 
+
+//##############################################################################
+
 /**
  * A container to view us easy access to display data from a CssRule
  */
 function SelectorView(aSelectorInfo)
 {
-  this.selectorInfo = aSelectorInfo;
+  var props = [ "value", "status", "selector", "href", "shortSource", "selector" ];
+  props.forEach(function(prop) {
+    this[prop] = aSelectorInfo[prop];
+  }, this);
 
   this._cacheStatusNames();
-}
 
-/**
- * Decode for cssInfo.rule.status
- * @see SelectorView.prototype._cacheStatusNames
- * @see CssLogic.STATUS
- */
-SelectorView.STATUS_NAMES = [
-  // "Unmatched", "Parent Match", "Matched", "Best Match"
-];
+  // A localized version of cssRule.status.
+  // TODO: This isn't currently used
+  this.statusText = SelectorView.STATUS_NAMES[this.status];
+}
 
 SelectorView.prototype = {
   /**
    * Cache localized status names.
-   *
    * These statuses are localized inside the inspector.properties string bundle.
    * @see csslogic.js - the CssLogic.STATUS array.
-   *
    * @param {nsIStringBundle} aStrings The string bundle from where to get the
    * localized status names.
    * @return {void}
@@ -484,56 +495,101 @@ SelectorView.prototype = {
       return;
     }
 
-    for (let status in CssLogic.STATUS) {
-      let i = CssLogic.STATUS[status];
+    for (var status in CssLogic.STATUS) {
+      var i = CssLogic.STATUS[status];
       if (i > -1) {
-        let value = CssHtmlTree.l10n("style.rule.status." + status);
+        var value = CssHtmlTree.l10n("style.rule.status." + status);
         // Replace normal spaces with non-breaking spaces
         SelectorView.STATUS_NAMES[i] = value.replace(/ /g, '\u00A0');
       }
     }
-  },
-
-  /**
-   * A localized version of cssRule.status
-   */
-  get statusText()
-  {
-    return SelectorView.STATUS_NAMES[this.selectorInfo.status];
-  },
-
-  text: function(aElement) {
-    let result = this.selectorInfo.selector.text;
-    if (this.selectorInfo.elementStyle) {
-      if (this.selectorInfo.sourceElement == InspectorUI.selection) {
-        result = "this";
-      } else {
-        result = CssLogic.getShortName(this.selectorInfo.sourceElement);
-        aElement.parentNode.querySelector(".rule-link > a").
-          addEventListener("click", function(aEvent) {
-            InspectorUI.inspectNode(this.selectorInfo.sourceElement);
-            aEvent.preventDefault();
-          }, false);
-      }
-
-      result += ".style";
-    }
-    return result;
   }
 };
 
-if (this.exports) {
-  exports.CssHtmlTree = CssHtmlTree;
-  exports.StyleGroupView = StyleGroupView;
-  exports.PropertyView = PropertyView;
-  exports.SelectorView = SelectorView;
+/**
+ * Decode for cssInfo.rule.status
+ * @see SelectorView.prototype._cacheStatusNames
+ * @see CssLogic.STATUS
+ */
+SelectorView.STATUS_NAMES = [
+  // "Unmatched", "Parent Match", "Matched", "Best Match"
+];
+
+
+//##############################################################################
+
+/**
+ * A container to view us easy access to display data from a CssRule
+ */
+function SheetView(aSheet)
+{
+  var props = [ "systemSheet", "index", "shortSource", "ruleCount", "href" ];
+  props.forEach(function(prop) {
+    this[prop] = aSheet[prop];
+  }, this);
+
+  var str = CssHtmlTree.l10n("style.property.numberOfRules");
+  this.ruleTitle = CssHtmlTree.pluralFormGetReplace(str, this.ruleCount);
+
+  this.populated = false;
+  this.populating = false;
+
+  // Populated by Templater:
+  this.element = null; // Element which contains the 'open' attribute
+  this.rulesEle = null;   // Destination for templateRules.
 }
+
+SheetView.prototype = {
+  /**
+   * What we do when someone clicks to expand to see the rules in the sheet
+   */
+  click: function(ev)
+  {
+    // TODO: Animate opening/closing. See bug 587752.
+    if (this.element.getAttribute("open") == "true") {
+      this.element.setAttribute("open", "false");
+      return;
+    }
+
+    if (!this.populated) {
+      if (this.populating) {
+        return;
+      }
+
+      this.populating = true;
+      CssHtmlTree.styleLogic.getRules(this.href, function(aRules) {
+        this.rules = [];
+        this.rules = aRules.map(function(aRule) {
+          return new RuleView(aRule);
+        }, this);
+
+        CssHtmlTree.template("templateRules", this.rulesEle, this);
+        this.populated = true;
+        this.populating = false;
+      }.bind(this));
+    }
+
+    this.element.setAttribute("open", "true");
+  },
+};
+
+
+//##############################################################################
+
+function RuleView(data)
+{
+  this.selectorGroup = data.selectorGroup;
+  this.selectors = this.selectorGroup.join(", ");
+  this.propertyCount = data.propertyCount;
+}
+
+//##############################################################################
 
 /**
  * We're not sure now we're going to do l10n yet, so this is a cut an paste from
  * inspector.properties, with light tweakage so it will work here.
  */
-let l10nLookup = {
+var l10nLookup = {
   // LOCALIZATION NOTE (style.property.numberOfRules): Semi-colon list of plural 
   // forms. See http://developer.mozilla.org/en/docs/Localization_and_Plurals
   // This is used inside the Style panel of the Inspector tool. For each style
@@ -586,12 +642,23 @@ let l10nLookup = {
   "style.group.Effects_and_Other": "Effects and Other"
 };
 
+if (this.exports) {
+  exports.CssHtmlTree = CssHtmlTree;
+  exports.StyleGroupView = StyleGroupView;
+  exports.PropertyView = PropertyView;
+  exports.SelectorView = SelectorView;
+}
+
 /**
  * This is effectively the main()
  */
 window.onload = function() {
   try {
     new CssHtmlTree();
+
+    // Without body.live, the templates are visible, so they show up in an
+    // HTML editor, but not in live.
+    document.body.classList.add("live");
   }
   catch (ex) {
     console.error(ex);

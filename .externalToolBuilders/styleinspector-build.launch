@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.ui.externaltools.ProgramBuilderLaunchConfigurationType">
+<mapAttribute key="org.eclipse.debug.core.environmentVariables">
+<mapEntry key="CUDDLEFISH_ROOT" value="${jetpack_home}"/>
+<mapEntry key="PATH" value="${jetpack_home}/bin:${env_var:PATH}"/>
+<mapEntry key="PYTHONPATH" value="${jetpack_home}/python-lib:${env_var:PYTHONPATH}"/>
+<mapEntry key="VIRTUAL_ENV" value="${jetpack_home}"/>
+</mapAttribute>
+<booleanAttribute key="org.eclipse.debug.ui.ATTR_LAUNCH_IN_BACKGROUND" value="false"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="${jetpack_home}/bin/cfx"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_RUN_BUILD_KINDS" value="full,incremental,auto,"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-r run"/>
+<booleanAttribute key="org.eclipse.ui.externaltools.ATTR_TRIGGERS_CONFIGURED" value="true"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY" value="${workspace_loc:/style-inspector}"/>
+</launchConfiguration>
