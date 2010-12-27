@@ -33,7 +33,7 @@
    * marshalling, and postMessage.
    */
   var callRemote = function(scopeName, funcName, args) {
-    args = Array.prototype.slice.call(args);
+    args = Array.prototype.slice.call(args, 0);
     var options = args.pop();
     if (typeof options === "function") {
       options = { callback: options };
