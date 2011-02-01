@@ -1,14 +1,14 @@
 
 /**
- * The start point for CssMedicLite
+ * The start point for CssDoctorLite
  * Setup in the self-exec function below
  */
-var startCssMedicLite = null;
+var startCssDoctorLite = null;
 var environment;
 
 (function() {
   /**
-   * A browser abstraction layer for CssMedicLite
+   * A browser abstraction layer for CssDoctorLite
    */
   function LiteBal() {
   }
@@ -145,9 +145,9 @@ var environment;
   };
 
   /**
-   * start point to setup a CssMedic using a Lite BAL
+   * start point to setup a CssDoctor using a Lite BAL
    */
-  startCssMedicLite = function() {
+  startCssDoctorLite = function() {
     var bal = new LiteBal();
     var scripts = [
       'lib/surrogate.js',
