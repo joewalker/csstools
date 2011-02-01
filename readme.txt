@@ -1,26 +1,37 @@
 
-Where Next?
-===========
+Create a basic lite browser backend
+Make it work in chrome
+Make it work in Firefox
+Create a smart gecko backend
+Fix up the inspector part
+Style review
 
-In a browser, load file:///Users/joe/Projects/mozilla/jetpack-sdk/packages/style-inspector/data/csshtmltree.html
-- The Inspector tab functions with the debug data.
-- The Doctor tab fails, we need to match up the parts of templateRules
-  - (i.e. rule.*) with the parts of SelectorView. There are some obvious naming
-    issues here as a result of cut and paste.
-  - When we've got the selectorGroups in a sheet displaying, we need to have
-    a click on a selectorGroup display the properties and values within, and
-    have them display the messages in ignore/rule-status-logic.txt
+UI Issues
+=========
 
-In 'live', the templates are silently failing to load. Probably a result of the
-  hacks to allow 'off-line' working. Put console.logs in the path, (or maybe
-  there is a debug option to the proxier?)
+From doctor.html:
 
+* Make the answerView wider, and overflow from the blank128 borders
+  * This should get rid of a thin white line rendering bug
+* Re-open to last position
+* Animate the open/close action - slide actions
+* Re-create blank128 in CSS or at least have higher res image
+  * Reduce the top border?
+* On open, close the other things at a similar level
 
-Outstanding tasks
------------------
-jQuery is massive overkill for just tabs. Use HTML5 :target instead
-  See http://playground.deaxon.com/css/tabs/#home
+The arrow isn't right. Maybe the arrow in blank22-arrow should point down not
+diagonally.
+The idea is that the icon is the minimized file which expands, so it shouldn't
+be 'there' when expanded.
+The problem is that having nothing in it's space looks strange because then you
+have a title which seems to be inexplicably hanging in space. So we added the
+arrow, but that's too much visual noise.
 
-Go through the CSS and prefix the doctor parts with doc, and so on
+* Try putting icons on right hand side (probably lined up in a table?)
 
-Make a single file proxier?
+From OverflowPanelHost:
+
+* Can we make the blur background work?
+* Add close button to toolbar (unimportant)
+* Make all bits of background close the dialog
+* Maybe we should emulate FF4's popup dialogs?

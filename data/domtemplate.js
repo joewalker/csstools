@@ -36,6 +36,7 @@
 
 // WARNING: do not 'use_strict' without reading the notes in envEval;
 
+
 /**
  * A templater that allows one to quickly template DOM nodes.
  */
@@ -43,7 +44,42 @@ function Templater() {
   this.scope = [];
 };
 
-Templater.add = function(a, b) { return a + b; };
+/**
+ * Clone the given template node, and process it by resolving ${} references
+ * in the template.
+ *
+ * @param {nsIDOMElement} template the template note to use.
+ * @param {nsIDOMElement} dest the destination node where the
+ * processed nodes will be displayed.
+ * @param {object} data the data to pass to the template.
+ */
+Templater.template = function (template, dest, data) {
+  if (template == null) throw new Error('template: template == null');
+  if (dest == null) throw new Error('template: dest == null');
+  if (data == null) throw new Error('template: data == null');
+
+  if (typeof dest === 'string') {
+    var newDest = document.getElementById(dest);
+    if (newDest == null) throw new Error('Missing dest id: ' + dest);
+    dest = newDest;
+  }
+
+  if (typeof template === 'string') {
+    var newTemplate = document.getElementById(template);
+    if (newTemplate == null) throw new Error('Missing template id: ' + template);
+    template = newTemplate;
+  }
+
+  dest.innerHTML = "";
+
+  // All the templater does is to populate a given DOM tree with the given
+  // values, so we need to clone the template first.
+  var duplicated = template.cloneNode(true);
+  new Templater().processNode(duplicated, data);
+  while (duplicated.firstChild) {
+    dest.appendChild(duplicated.firstChild);
+  }
+};
 
 /**
  * Recursive function to walk the tree processing the attributes as it goes.
@@ -401,6 +437,3 @@ Templater.prototype.logError = function(message) {
   console.log(message);
 };
 
-if (this.exports) {
-  exports.Templater = Templater;
-}

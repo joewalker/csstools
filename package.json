@@ -1,10 +1,10 @@
 {
-  "id": "jid0-FL1gKekCUMsuNQn9X3CEiL7iKYM",
-  "name": "style-inspector",
+  "name": "csstools",
+  "id": "jid0-UJ5j6ehBqtouqVIF97ngP1YMxnk", 
   "fullName": "Stylesheet Inspector",
   "description": "An experimental alternate CSS viewer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Joe Walker (jwalker@mozilla.com)",
   "license": "MPL/GPL/LGPL",
-  "dependencies": [ "jetpack-core", "addon-kit" ]
+  "dependencies": [ ]
 }

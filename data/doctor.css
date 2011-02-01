@@ -1,0 +1,170 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is mozilla.org code.
+ *
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Joe Walker <jwalker@mozilla.com> (original author)
+ *   Mihai Șucan <mihai.sucan@gmail.com>
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+
+#docRoot {
+  font-family: Helvetica, Arial, sans-serif;
+  margin: 10px;
+  background: #FFF;
+  font-size: 11pt;
+  color: #000;
+}
+
+#docRoot p { color: inherit; }
+
+.docIntro { }
+.docInspected { color: #008; font-weight: bold; }
+
+.docSheet {
+  padding: 2px 0 10px 25px;
+  margin: 5px 0 0 0;
+  background-repeat: no-repeat;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.docSheet:hover { color: #00A; }
+
+.docSheetOpen > .docSheet {
+  font-weight: bold;
+  color: #008;
+  background-image: url(images/blank22-arrow.png);
+}
+
+.docCount0 { background-image: url(images/blank22-0.png); }
+.docCount1 { background-image: url(images/blank22-1.png); }
+.docCount2 { background-image: url(images/blank22-2.png); }
+.docCount3 { background-image: url(images/blank22-3.png); }
+.docCount4 { background-image: url(images/blank22-4.png); }
+.docCount5 { background-image: url(images/blank22-5.png); }
+.docCount6 { background-image: url(images/blank22-6.png); }
+.docCount7 { background-image: url(images/blank22-7.png); }
+.docCount8 { background-image: url(images/blank22-8.png); }
+
+.docHidden { display: none; }
+
+.docRuleView {
+  display: none;
+  font-size: 10pt;
+  font-family: Consolas, Inconsolata, Courier New, monospace;
+}
+
+.docSheetOpen > .docRuleView {
+  margin-left: 10px;
+  display: block;
+  /* Icon from http://www.iconfinder.com/icondetails/3784/128/ */
+  -moz-border-image: url(images/blank128.png) 24 23 6 6 / 22px 21px 6px 6px stretch;
+  -webkit-border-image: url(images/blank128.png) 24 24 6 6 / 24px 24px 6px 6px stretch;
+  width: 90%;
+  padding-bottom: 15px;
+  -moz-box-sizing: border-box;
+}
+
+.docRuleHeader {
+  font-weight: normal;
+  padding: 2px 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.docRuleHeader::after {
+  content: '  { ... }';
+  color: #AAA;
+  font-size: 8pt;
+}
+
+.docRuleHeader:hover { color: #00A; }
+
+.docRuleOpen > .docRuleHeader {
+  font-weight: bold;
+  color: #008;
+}
+
+.docRuleOpen > .docRuleHeader::after { content: '  {'; }
+
+.docRuleOpen > .docSettingView { display: block; }
+
+.docSettingView {
+  display: none;
+  color: #AAA;
+  font-size: 8pt;
+  white-space: nowrap;
+  overflow: hidden;
+  padding-left: 10px;
+}
+
+.docSettingHeader {
+  cursor: pointer;
+  font-size: 9pt;
+  padding-left: 10px;
+  color: #666;
+}
+
+.docSettingOpen > .docSettingHeader {
+  font-weight: bold;
+  color: #008;
+}
+
+.docSettingHeader:hover { color: #00A; }
+
+.docAnswerView { display: none; }
+.docSettingOpen > .docAnswerView { display: block; }
+
+.docAnswerSpeech {
+  margin: 0 40px -8px 40px;
+  font-weight: bold;
+  font-size: 14pt;
+  color: #008;
+}
+.docAnswerSpeech::before {
+  content: '\025B2';
+}
+
+.docAnswer {
+  background: #FFF;
+  color: black;
+  font-family: Helvetica, Arial, sans-serif;
+  border: 2px solid #008;
+  border-radius: 5px; -moz-border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+  font-size: 10pt;
+  padding: 0 10px;
+  white-space: normal;
+}
+
+.docAnswer p { margin: 0.8em 0; }

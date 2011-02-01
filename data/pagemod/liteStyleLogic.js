@@ -35,65 +35,59 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const contextMenu = require("context-menu");
+var styleLogic = {
+  getSheets: function() {
+    return [
+      {
+        systemSheet: false,
+        index: 0,
+        shortSource: "styles.css",
+        ruleCount: 3,
+        href: "http://example.com/page/styles.css"
+      },
+      {
+        systemSheet: false,
+        index: 1,
+        shortSource: "global.css",
+        ruleCount: 15,
+        href: "http://example.com/global.css"
+      }
+    ];
+  },
 
-const data = require("self").data;
-const panel = require("panel");
-const Surrogate = require("surrogate").Surrogate;
-const pageMod = require("page-mod");
+  getRules: function(sheetHref) {
+    return [
+      { selectorId: 1, selectorGroup: [ ".group h1", ".sheet h1" ], propertyCount: 3 },
+      { selectorId: 2, selectorGroup: [ "#error" ], propertyCount: 1 },
+      { selectorId: 3, selectorGroup: [ "p.content" ], propertyCount: 5 }
+    ];
+  },
 
-Surrogate.setLogLevel(Surrogate.LogLevel.DEBUG);
+  getSettings: function(sheetHref, selectorId) {
+    return [
+      { settingId: 1, property: "color", value: "red" },
+      { settingId: 2, property: "background-color", value: "blue" },
+    ];
+  },
 
-/**
- * TODO: This is the last page to load, which we're assuming is the one we're
- * inspecting. This is of course a huge assumption. The correct thing to do is
- * to inject the page-mod when asked, but the API for that isn't public yet.
- */
-var styleLogic;
-
-/**
- * Add the "Inspect Styles" context menu.
- * TODO: How do we add the menu to links too?
- */
-var inspectMenu = contextMenu.Item({
-
-  label: "CSS Doctor",
-  contentScriptFile: data.url("findClick.js"),
-
-  onMessage: function(id) {
-
-    var doctorPanel = panel.Panel({
-      contentURL: data.url("doctor.html"),
-      contentScriptFile: [
-        data.url("surrogate.js"),
-        data.url("domtemplate.js"),
-        data.url("doctor.js")
-      ],
-      contentScript: 'doctor("' + id + '");',
-      contentScriptWhen: 'ready'
-    });
-
-    var surrogate = new Surrogate(doctorPanel);
-    surrogate.supplyLacoAsync("styleLogic", styleLogic);
-
-    doctorPanel.show();
+  getAnswer: function(sheetHref, settingId) {
+    return {
+      text: "<p>This rule clashes with another rule because both rules have " +
+          "the same number of IDs, classes and tags, but the other rule was " +
+          "specified later in the page.</p>" +
+          "<p><strong>Note</strong>: Changing rules can <a href='#'>affect " +
+          "many elements</a>.</p>" +
+          "<p><strong>Note</strong>: For detail, see <a href='#'>how CSS " +
+          "specificity works</a>.</p>"
+          /*
+           * To promote this rule either add IDs, " +
+          "classes or tags to this rule, or remove them from the other, or " +
+          "move this rule down the page, past the other rule.
+           */
+      };
   }
-});
+};
 
-/**
- * A way for the page to respond to requests for info about the structure
- */
-var styleLogicMod = pageMod.PageMod({
-  include: [ "*" ],
-  contentScriptFile: [
-    data.url("pagemod/liteStyleLogic.js"),
-    data.url("surrogate.js")
-  ],
-  contentScriptWhen: 'ready',
-  contentScript: "new Surrogate(this).supply('styleLogic', styleLogic);",
-  onAttach: function(worker) {
-    var surrogate = new Surrogate(worker);
-    styleLogic = surrogate.require('styleLogic');
-    console.log('Attached');
-  }
-});
+if (this.exports) {
+  exports.styleLogic = styleLogic;
+}

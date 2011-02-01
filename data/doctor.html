@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<link rel="stylesheet" type="text/css" href="doctor.css" />
+<div>
+  <div id="docRoot">
+  </div>
+
+  <!--
+  templateDoctor needs an instance of CssHtmlTree from which it gets sheets
+  -->
+  <div id="docTemplateSheets" class="docHidden">
+    <p>Element: <span class="docInspected">${inspected}</span>.</p>
+    <p class="docIntro">CSS Rule not working on this element? Which rule
+    isn't working?</p>
+
+    <div foreach="sheetView in ${sheetViews}" save="${sheetView.element}">
+      <div _onclick="${sheetView.click}" class="docSheet ${sheetView.size}"
+          title="${sheetView.href}">${sheetView.shortSource}</div>
+      <div save="${sheetView.rulesEle}" class="docRuleView"></div>
+    </div>
+  </div>
+
+  <!--
+  A templateRules sits inside each templateProperties showing the list of the
+  selectors that affect the property. Each needs data an object containing
+  a selectorViews property which is an array of SelectorViews
+  This is a template so the parent does not need to be a table, except that
+  using a div a the parent causes the DOM to muck with the tr elements
+  -->
+  <div id="docTemplateRules" class="docHidden">
+    <div foreach="ruleView in ${ruleViews}" save="${ruleView.element}">
+      <div class="docRuleHeader" _onclick="${ruleView.click}"
+          title="${ruleView.title}">${ruleView.selectors}</div>
+      <div save="${ruleView.settingsEle}" class="docSettingView"></div>
+    </div>
+  </div>
+
+  <!--
+  -->
+  <div id="docTemplateSettings" class="docHidden">
+    <div foreach="settingView in ${settingViews}" save="${settingView.element}">
+      <div class="docSettingHeader" _onclick="${settingView.click}">
+        <span class="docSettingProperty">${settingView.property}</span>: 
+        <span class="docSettingValue">${settingView.value}</span>
+      </div>
+      <div save="${settingView.answerEle}" class="docAnswerView"></div>
+    </div>
+    }
+  </div>
+
+  <!--
+  -->
+  <div id="docTemplateAnswer" class="docHidden">
+    <div class="docAnswerSpeech"></div>
+    <div class="docAnswer">${answerView.text}</div>
+  </div>
+</div>

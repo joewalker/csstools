@@ -1,0 +1,51 @@
+
+<style>
+#panelHostBackground {
+  position: absolute; top: 0; height: 100%; left: 0; right: 0;
+  background: #FFF;
+  opacity: 0.6;
+  z-index: 1000;
+  /* TODO: what's wrong with this? filter: url(#blur);*/
+}
+#panelHostTop {
+  position: absolute; top: 50%; margin-top: -175px; left: 0; right: 0;
+  z-index: 1001;
+}
+#panelHostDialog {
+  height: 350px; width: 250px;
+  margin: auto;
+  background: #FFF;
+  border: 1px solid #666;
+  border-radius: 5px; -moz-border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+}
+#panelHostTitle {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11pt;
+  background: #000;
+  color: #FFF;
+  padding: 4px 6px;
+  background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #000000), color-stop(1, #4A4A4A));
+  background-image: -moz-linear-gradient(center bottom, #000000 0%, #4A4A4A 100%);
+}
+#panelHostContainer {
+  width: 100%;
+  height: 90%;
+  overflow: auto;
+}
+</style>
+
+<div id="panelHostBackground" style="display:none;">
+</div>
+<div id="panelHostTop" style="display:none;">
+  <div id="panelHostDialog">
+    <div id="panelHostTitle"></div>
+    <div id="panelHostContainer"></div>
+  </div>
+</div>
+
+<svg>
+  <filter id="blur">
+    <feGaussianBlur stdDeviation="3"/>
+  </filter>
+</svg>
