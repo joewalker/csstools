@@ -4,7 +4,6 @@
  * Setup in the self-exec function below
  */
 var startCssDoctorLite = null;
-var environment;
 
 (function() {
   /**
@@ -172,12 +171,24 @@ var environment;
           contents: 'data/doctor.html',
           css: [ 'data/doctor.css' ],
           onload: function() {
-            var surrogate = new Surrogate('loopback');
-            Surrogate.setLogLevel(Surrogate.LogLevel.DEBUG);
+            var surrogate = new Surrogate('loopback', {
+              name: 'loopback',
+              logLevel: Surrogate.LogLevel.DEBUG,
+              defaultErrBack: console.error
+            });
             surrogate.supply('styleLogic', styleLogic);
             styleLogic = surrogate.require('styleLogic');
+            /*
+            var styleLogic = new Surrogate(this, {
+              name: 'doctor.js',
+              logLevel: Surrogate.LogLevel.DEBUG,
+              defaultErrBack: console.error
+            }).require('styleLogic');
+            */
 
-            doctor(element.tagName.toLowerCase() + '#' + (element.id || 'tempId'));
+            var inspectedCssName = element.tagName.toLowerCase() +
+                '#' + (element.id || 'tempId');
+            doctor(inspectedCssName, styleLogic, Templater);
           }
         });
         panel.show();

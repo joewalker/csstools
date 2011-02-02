@@ -1,6 +1,5 @@
 
 Create a basic lite browser backend
-Make it work in chrome
 Make it work in Firefox
 Create a smart gecko backend
 Fix up the inspector part
@@ -35,3 +34,9 @@ From OverflowPanelHost:
 * Add close button to toolbar (unimportant)
 * Make all bits of background close the dialog
 * Maybe we should emulate FF4's popup dialogs?
+
+
+Notes on the SDK
+================
+It seems legitimate to want to share copies of surrogate.js.
+- Isn't how addon authors lay out their files, their business?

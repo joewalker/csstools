@@ -56,6 +56,9 @@ var styleLogic = {
   },
 
   getRules: function(sheetHref, callback) {
+    if (sheetHref == null) {
+      throw new Error("Missing sheetHref");
+    }
     return [
       { selectorId: 1, selectorGroup: [ ".group h1", ".sheet h1" ], propertyCount: 3 },
       { selectorId: 2, selectorGroup: [ "#error" ], propertyCount: 1 },
@@ -64,6 +67,12 @@ var styleLogic = {
   },
 
   getSettings: function(sheetHref, selectorId, callback) {
+    if (sheetHref == null) {
+      throw new Error("Missing sheetHref");
+    }
+    if (selectorId == null) {
+      throw new Error("Missing selectorId");
+    }
     return [
       { settingId: 1, property: "color", value: "red" },
       { settingId: 2, property: "background-color", value: "blue" },
@@ -71,6 +80,12 @@ var styleLogic = {
   },
 
   getAnswer: function(sheetHref, settingId, callback) {
+    if (sheetHref == null) {
+      throw new Error("Missing sheetHref");
+    }
+    if (settingId == null) {
+      throw new Error("Missing settingId");
+    }
     return {
       text: "<p>This rule clashes with another rule because both rules have " +
           "the same number of IDs, classes and tags, but the other rule was " +
