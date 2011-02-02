@@ -10,7 +10,10 @@
  * This is the main function.
  */
 function doctor(inspectedCssName, styleLogic, Templater) {
-  styleLogic.getSheets(function(sheets) {
+  doctor.styleLogic = styleLogic;
+  doctor.Templater = Templater;
+
+  doctor.styleLogic.getSheets(function(sheets) {
     var data = {
       inspected: inspectedCssName,
       sheetViews: sheets.map(function(sheet) {
@@ -18,7 +21,7 @@ function doctor(inspectedCssName, styleLogic, Templater) {
       }, this)
     };
 
-    Templater.template('docTemplateSheets', 'docRoot', data);
+    doctor.Templater.template('docTemplateSheets', 'docRoot', data);
   }.bind(this));
 }
 
@@ -55,13 +58,13 @@ SheetView.prototype = {
       }
 
       this.populating = true;
-      styleLogic.getRules(this.href, function(aRules) {
+      doctor.styleLogic.getRules(this.href, function(aRules) {
         this.ruleViews = [];
         this.ruleViews = aRules.map(function(rule) {
           return new RuleView(this.href, rule);
         }, this);
 
-        Templater.template('docTemplateRules', this.rulesEle, this);
+        doctor.Templater.template('docTemplateRules', this.rulesEle, this);
         this.populated = true;
         this.populating = false;
       }.bind(this));
@@ -97,13 +100,13 @@ RuleView.prototype = {
       }
 
       this.populating = true;
-      styleLogic.getSettings(this.href, this.id, function(settings) {
+      doctor.styleLogic.getSettings(this.href, this.id, function(settings) {
         this.settingViews = [];
         this.settingViews = settings.map(function(setting) {
           return new SettingView(this.href, setting);
         }, this);
 
-        Templater.template('docTemplateSettings', this.settingsEle, this);
+        doctor.Templater.template('docTemplateSettings', this.settingsEle, this);
         this.populated = true;
         this.populating = false;
       }.bind(this));
@@ -137,10 +140,10 @@ SettingView.prototype = {
       }
 
       this.populating = true;
-      styleLogic.getAnswer(this.href, this.id, function(answer) {
+      doctor.styleLogic.getAnswer(this.href, this.id, function(answer) {
         this.answerView = new AnswerView(answer);
 
-        Templater.template('docTemplateAnswer', this.answerEle, this);
+        doctor.Templater.template('docTemplateAnswer', this.answerEle, this);
         this.populated = true;
         this.populating = false;
       }.bind(this));

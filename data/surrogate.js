@@ -333,7 +333,7 @@ function Surrogate(handler, options) {
       var argstr = args.map(function(arg) { return str(arg); }).join(",");
       console.log(this._name + "lpre " + data.callId + ": " + data.scopeName +
           "." + data.funcName + "(" + argstr + ")");
-      args.unshift({
+      args.push({
         callback: function(reply) {
           this.handler.postMessage({ callId: data.callId, reply: reply });
           console.log(this._name + "lpst " + data.callId + ": " + data.scopeName +

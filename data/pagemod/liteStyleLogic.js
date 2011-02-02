@@ -36,6 +36,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 var styleLogic = {
+  _impl: 'liteStyleLogic',
+
   getSheets: function() {
     return [
       {
