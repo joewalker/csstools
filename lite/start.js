@@ -66,6 +66,7 @@ var environment;
    */
   LiteBal.prototype.addScriptTag = function(src, callback, context) {
     if (src == null) {
+      callback.call(context);
       return;
     }
 
@@ -79,6 +80,10 @@ var environment;
           }
         });
       }, this);
+
+      if (src.length === 0) {
+        callback.call(context);
+      }
       return;
     }
 
@@ -165,15 +170,17 @@ var environment;
         var panel = host.createPanel({
           title: 'CSS Doctor',
           contents: 'data/doctor.html',
-          css: [ 'data/doctor.css' ]
+          css: [ 'data/doctor.css' ],
+          onload: function() {
+            var surrogate = new Surrogate('loopback');
+            Surrogate.setLogLevel(Surrogate.LogLevel.DEBUG);
+            surrogate.supply('styleLogic', styleLogic);
+            styleLogic = surrogate.require('styleLogic');
+
+            doctor(element.tagName.toLowerCase() + '#' + (element.id || 'tempId'));
+          }
         });
         panel.show();
-
-        var surrogate = new Surrogate('loopback');
-        surrogate.supply('styleLogic', styleLogic);
-        styleLogic = surrogate.require('styleLogic');
-
-        doctor(element.tagName.toLowerCase() + '#' + (element.id || 'tempId'));
       });
     }, bal);
   };

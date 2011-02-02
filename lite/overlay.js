@@ -56,9 +56,7 @@
    */
   function OverlayPanelHost(bal) {
     this.bal = bal;
-  }
-  OverlayPanelHost.prototype.createPanel = function(options) {
-    var panel = new Panel(this, options);
+
     if (!dialog) {
       this.bal.requireResource('lite/overlay.html', function(data) {
         appendHtmlToBody(document.body, data);
@@ -72,20 +70,34 @@
         }, false);
 
         setShowing();
-        this.createPanel(panel);
       }.bind(this));
     }
-    else {
-      titleEle.innerHTML = panel.title;
-      this.bal.requireResource(panel.contents, function(data) {
-        container.innerHTML = '';
-        appendHtmlToBody(container, data);
-      }.bind(this));
+  }
+  OverlayPanelHost.prototype.createPanel = function(options) {
+    var outstanding = 2; // 2 async jobs
+    var panel = new Panel(this, options);
 
-      this.bal.addStyleTag(panel.css);
-      this.bal.addScriptTag(panel.script, function() {
-      });
+    titleEle.innerHTML = panel.title;
+    this.bal.requireResource(panel.contents, function(data) {
+      container.innerHTML = '';
+      appendHtmlToBody(container, data);
+      checkLoaded('contents');
+    }.bind(this));
+
+    this.bal.addStyleTag(panel.css);
+
+    this.bal.addScriptTag(panel.script, function() {
+      checkLoaded('scripts');
+    });
+
+    function checkLoaded(msg) {
+      console.log(msg);
+      outstanding--;
+      if (outstanding === 0 && options.onload) {
+        options.onload();
+      }
     }
+
     return panel;
   };
 
