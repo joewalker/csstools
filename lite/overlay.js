@@ -81,17 +81,16 @@
     this.bal.requireResource(panel.contents, function(data) {
       container.innerHTML = '';
       appendHtmlToBody(container, data);
-      checkLoaded('contents');
+      checkLoaded();
     }.bind(this));
 
     this.bal.addStyleTag(panel.css);
 
     this.bal.addScriptTag(panel.script, function() {
-      checkLoaded('scripts');
+      checkLoaded();
     });
 
-    function checkLoaded(msg) {
-      console.log(msg);
+    function checkLoaded() {
       outstanding--;
       if (outstanding === 0 && options.onload) {
         options.onload();

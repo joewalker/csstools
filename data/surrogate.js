@@ -1,3 +1,39 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the Mozilla Inspector Module.
+ *
+ * The Initial Developer of the Original Code is
+ * The Mozilla Foundation.
+ * Portions created by the Initial Developer are Copyright (C) 2010
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Joe Walker <jwalker@mozilla.com> (original author)
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
 
 /**
  * Construct a new Surrogate that passes message to another Surrogate via
@@ -5,8 +41,12 @@
  */
 function Surrogate(handler, options) {
   options = options || {};
-  this.logLevel = options.logLevel || Surrogate.LogLevel.SILENT;
+
+  // Debugging aids
   this._name = options.name ? '(' + options.name + ') ' : '';
+  this.logLevel = options.logLevel || Surrogate.LogLevel.SILENT;
+
+  // Used if there is no errback specified in the callback object
   this._defaultErrBack = options.defaultErrBack;
 
   if (handler === "loopback") {
@@ -16,6 +56,15 @@ function Surrogate(handler, options) {
     this.handler = handler;
     handler.on('message', this._routeMessage.bind(this));
   }
+
+  // The objects that have been defined via a 'supply*()' method
+  this._defined = {};
+  // An array of the outstanding calls. Could be a handy place to do debugging
+  this.calls = [];
+  // We invent a unique ID for each function call.
+  // TODO: At some point this is going to overflow, however I suspect that the
+  // sun will burn out first. Compare expected overflow time with sun age.
+  this.nextCallId = 1;
 }
 (function() {
   /**
@@ -27,19 +76,6 @@ function Surrogate(handler, options) {
     WARNING: 2, // Output when something might be broken
     DEBUG: 3    // Output to say what's going on
   };
-
-  /**
-   * We invent a unique ID for each function call.
-   * At some point this is going to overflow, however I suspect that the sun
-   * will burn out first. TODO: Compare expected overflow time with sun age.
-   */
-  var nextCallId = 1;
-
-  /**
-   * An array of the outstanding calls.
-   * This could be a handy place to do debugging
-   */
-  var calls = [];
 
   /**
    * Send the request either to the termination point or the execution point
@@ -60,9 +96,36 @@ function Surrogate(handler, options) {
   Surrogate.prototype._createLoopback = function() {
     this.handler = {
       postMessage: function(data) {
-        this._routeMessage(data);
+        // We make this async so people don't rely on it being sync
+        setTimeout(function() {
+          this._routeMessage(data);
+        }.bind(this), 10);
       }.bind(this)
     };
+  };
+
+  function Endpoint(side) {
+    this.side = side;
+  }
+  Endpoint.prototype = {
+    postMessage: function(message) {
+      var clone = JSON.parse(JSON.stringify(message));
+      this.other._handler(clone);
+    },
+    on: function(name, handler) {
+      if (name === 'message') {
+        this._handler = handler;
+      }
+    }
+  };
+  function Pipe() {
+    this.left = new Endpoint('left');
+    this.right = new Endpoint('right');
+    this.left.other = this.right;
+    this.right.other = this.left;
+  }
+  Surrogate.createPipe = function() {
+    return new Pipe();
   };
 
   /**
@@ -95,7 +158,7 @@ function Surrogate(handler, options) {
     if (typeof options === "function") {
       options = { callback: options };
     }
-    var callId = nextCallId++;
+    var callId = this.nextCallId++;
     var call = {
       options: options,
       data: {
@@ -103,7 +166,7 @@ function Surrogate(handler, options) {
         funcName: funcName, args: args
       }
     };
-    calls[callId] = call;
+    this.calls[callId] = call;
 
     if (this.logLevel >= Surrogate.LogLevel.DEBUG) {
       var argstr = args.map(function(arg) { return str(arg); }).join(",");
@@ -119,14 +182,14 @@ function Surrogate(handler, options) {
    * _beginRemoteCall
    */
   Surrogate.prototype._endRemoteCall = function(data) {
-    var call = calls[data.callId];
+    var call = this.calls[data.callId];
     if (!call) {
       if (this.logLevel >= Surrogate.LogLevel.ERROR) {
         console.error(this._name + "Unknown end callId " + data.callId);
       }
       return;
     }
-    delete calls[data.callId];
+    delete this.calls[data.callId];
 
     // Call the callback if there was send data
     if ("reply" in data) {
@@ -182,6 +245,12 @@ function Surrogate(handler, options) {
     // Maybe we want to check to see if name has been registered?
     return Proxy.create({
       get: function(proxy, funcName) {
+        if (funcName === 'toString') {
+          return '[Proxy ' + scopeName + '.toString]';
+        }
+        if (funcName === 'toSource') {
+          return '[Proxy ' + scopeName + '.toSource]';
+        }
         return function() {
           surrogate._beginRemoteCall(scopeName, funcName, arguments);
         };
@@ -190,11 +259,6 @@ function Surrogate(handler, options) {
   };
 
   /* These functions are 'server' side */
-
-  /**
-   * The objects that have been defined via a 'supply*()' method
-   */
-  var defined = {};
 
   /**
    * There are many ways to create asynchronous functions.
@@ -214,9 +278,9 @@ function Surrogate(handler, options) {
       throw new Error('Expected a string scopeName');
     }
     if (!obj) {
-      throw new Error('Missing object to supplyLacoAsync');
+      throw new Error('Missing object to supply');
     }
-    defined[scopeName] = { obj: obj, type: Type.NORMAL };
+    this._defined[scopeName] = { obj: obj, type: Type.NORMAL };
   };
 
   /**
@@ -233,7 +297,7 @@ function Surrogate(handler, options) {
     if (!lacoAsyncObj) {
       throw new Error('Missing object to supplyLacoAsync');
     }
-    defined[scopeName] = { obj: lacoAsyncObj, type: Type.LACO };
+    this._defined[scopeName] = { obj: lacoAsyncObj, type: Type.LACO };
   };
 
   /**
@@ -242,7 +306,7 @@ function Surrogate(handler, options) {
    */
   Surrogate.prototype._executeCall = function(data) {
     // This is called as a result of postMessage in #beginRemoteCall() above
-    var def = defined[data.scopeName];
+    var def = this._defined[data.scopeName];
     if (!def) {
       console.error(this._name + "Unknown scope: " + data.scopeName);
       return;
