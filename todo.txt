@@ -40,3 +40,9 @@ Notes on the SDK
 ================
 It seems legitimate to want to share copies of surrogate.js.
 - Isn't how addon authors lay out their files, their business?
+
+
+Checks the Doctor will need to make
+===================================
+- Is the rule in a sheet that is disabled
+- Is the rule in a sheet excluded by it's media type?

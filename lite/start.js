@@ -150,7 +150,6 @@ var startCssDoctorLite = null;
     selectedElement = ev.target;
     selectingElement = false;
 
-    console.log('Found element: ', selectedElement);
     callback(selectedElement);
 
     // TODO: this isn't working. why?
@@ -180,7 +179,6 @@ var startCssDoctorLite = null;
     selectedElement = null;
     callback = aCallback;
 
-    console.log('Element selection started');
     window.addEventListener('click', clickHandler, true);
   };
 
@@ -191,7 +189,7 @@ var startCssDoctorLite = null;
     var bal = new LiteBal();
     var scripts = [
       'lib/surrogate.js',
-      'data/pagemod/testStyleLogic.js',
+      'data/pagemod/liteStyleLogic.js',
       'data/doctor.js',
       'data/domtemplate.js',
       'lite/overlay.js'
@@ -199,8 +197,6 @@ var startCssDoctorLite = null;
     bal.addScriptTag(scripts, function() {
       var host = new OverlayPanelHost(bal);
       bal.pickElement(function(element) {
-
-        console.log('Got element ', element, '. Picking rule ...');
 
         var panel = host.createPanel({
           title: 'CSS Doctor',
@@ -210,8 +206,8 @@ var startCssDoctorLite = null;
             /*
             var surrogate = new Surrogate('loopback', {
               name: 'loopback',
-              logLevel: Surrogate.LogLevel.DEBUG,
-              defaultErrBack: console.error
+              logLevel: Surrogate.LogLevel.WARNING,
+              defaultErrback: Surrogate.simpleErrback
             });
             surrogate.supply('styleLogic', styleLogic);
             styleLogic = surrogate.require('styleLogic');
@@ -219,25 +215,25 @@ var startCssDoctorLite = null;
             var addonPipe = Surrogate.createPipe();
             new Surrogate(addonPipe.left, {
               name: 'toAddon  ',
-              logLevel: Surrogate.LogLevel.DEBUG,
-              defaultErrBack: console.error
+              logLevel: Surrogate.LogLevel.WARNING,
+              defaultErrback: Surrogate.simpleErrback
             }).supply('styleLogic', window.styleLogic);
             var lacoStyleLogic = new Surrogate(addonPipe.right, {
               name: 'toPageMod',
-              logLevel: Surrogate.LogLevel.DEBUG,
-              defaultErrBack: console.error
+              logLevel: Surrogate.LogLevel.WARNING,
+              defaultErrback: Surrogate.simpleErrback
             }).require("styleLogic");
 
             var panelPipe = Surrogate.createPipe();
             new Surrogate(panelPipe.left, {
               name: "toPanel  ",
-              logLevel: Surrogate.LogLevel.DEBUG,
-              defaultErrBack: console.error
+              logLevel: Surrogate.LogLevel.WARNING,
+              defaultErrback: Surrogate.simpleErrback
             }).supplyLacoAsync("styleLogic", lacoStyleLogic);
             var proxyStyleLogic = new Surrogate(panelPipe.right, {
               name: 'doctor.js',
-              logLevel: Surrogate.LogLevel.DEBUG,
-              defaultErrBack: console.error
+              logLevel: Surrogate.LogLevel.WARNING,
+              defaultErrback: Surrogate.simpleErrback
             }).require('styleLogic');
 
             var inspectedCssName = element.tagName.toLowerCase() +

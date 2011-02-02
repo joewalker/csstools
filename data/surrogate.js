@@ -47,7 +47,7 @@ function Surrogate(handler, options) {
   this.logLevel = options.logLevel || Surrogate.LogLevel.SILENT;
 
   // Used if there is no errback specified in the callback object
-  this._defaultErrBack = options.defaultErrBack;
+  this._defaultErrback = options.defaultErrback;
 
   if (handler === "loopback") {
     this._createLoopback();
@@ -75,6 +75,14 @@ function Surrogate(handler, options) {
     ERROR: 1,   // Output when something is obviously broken
     WARNING: 2, // Output when something might be broken
     DEBUG: 3    // Output to say what's going on
+  };
+
+  /**
+   * A really simple implementation of an errback that just sends to
+   * console.error
+   */
+  Surrogate.simpleErrback = function(ex) {
+    console.error(JSON.stringify(ex));
   };
 
   /**
@@ -219,8 +227,8 @@ function Surrogate(handler, options) {
       if (call.options.errback) {
         call.options.errback.apply(call.options.scope, [ data.exception ]);
       }
-      else if (this._defaultErrBack) {
-        this._defaultErrBack(data.exception);
+      else if (this._defaultErrback) {
+        this._defaultErrback(data.exception);
       }
       else {
         if (this.logLevel >= Surrogate.LogLevel.WARNING) {
@@ -315,36 +323,57 @@ function Surrogate(handler, options) {
     if (def.type === Type.NORMAL) {
       var argstr = data.args.map(function(arg) { return str(arg); }).join(",");
       try {
-        console.log(this._name + "npre " + data.callId + ": " + data.scopeName +
-            "." + data.funcName + "(" + argstr + ")");
+        if (this.logLevel >= Surrogate.LogLevel.DEBUG) {
+          console.log(this._name + "npre " + data.callId + ": " +
+               data.scopeName + "." + data.funcName + "(" + argstr + ")");
+        }
+
         var reply = def.obj[data.funcName].apply(def.obj, data.args);
-        console.log(this._name + "npst " + data.callId + ": " + data.scopeName +
-            "." + data.funcName + " -> " + str(reply));
+
+        if (this.logLevel >= Surrogate.LogLevel.DEBUG) {
+          console.log(this._name + "npst " + data.callId + ": " +
+              data.scopeName + "." + data.funcName + " -> " + str(reply));
+        }
+
         this.handler.postMessage({ callId: data.callId, reply: reply });
       }
       catch (ex) {
-        console.log(this._name + "nerr " + data.callId + ": " + data.scopeName +
-            "." + data.funcName + " -> " + str(ex));
+        if (this.logLevel >= Surrogate.LogLevel.WARNING) {
+          console.log(this._name + "fail " + data.callId + ": " +
+              data.scopeName + "." + data.funcName + " -> " + str(ex));
+        }
+
         this.handler.postMessage({ callId: data.callId, exception: ex });
       }
     }
     else if (def.type === Type.LACO) {
       var args = Array.prototype.slice.call(data.args, 0);
       var argstr = args.map(function(arg) { return str(arg); }).join(",");
-      console.log(this._name + "lpre " + data.callId + ": " + data.scopeName +
-          "." + data.funcName + "(" + argstr + ")");
+
+      if (this.logLevel >= Surrogate.LogLevel.DEBUG) {
+        console.log(this._name + "lpre " + data.callId + ": " + data.scopeName +
+            "." + data.funcName + "(" + argstr + ")");
+      }
+
       args.push({
         callback: function(reply) {
           this.handler.postMessage({ callId: data.callId, reply: reply });
-          console.log(this._name + "lpst " + data.callId + ": " + data.scopeName +
-              "." + data.funcName + " -> " + str(reply));
+
+          if (this.logLevel >= Surrogate.LogLevel.DEBUG) {
+            console.log(this._name + "lpst " + data.callId + ": " +
+                data.scopeName + "." + data.funcName + " -> " + str(reply));
+          }
         }.bind(this),
         errback: function(ex) {
           this.handler.postMessage({ callId: data.callId, exception: ex });
-          console.log(this._name + "lerr " + data.callId + ": " + data.scopeName +
-              "." + data.funcName + " -> " + str(ex));
+
+          if (this.logLevel >= Surrogate.LogLevel.DEBUG) {
+            console.log(this._name + "lerr " + data.callId + ": " +
+                data.scopeName + "." + data.funcName + " -> " + str(ex));
+          }
         }.bind(this)
       });
+
       def.obj[data.funcName].apply(def.obj, args);
     }
   };

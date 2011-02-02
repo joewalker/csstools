@@ -14,6 +14,7 @@ function doctor(inspectedCssName, styleLogic, Templater) {
   doctor.Templater = Templater;
 
   doctor.styleLogic.getSheets(function(sheets) {
+    console.log(sheets);
     var data = {
       inspected: inspectedCssName,
       sheetViews: sheets.map(function(sheet) {
@@ -36,7 +37,7 @@ function SheetView(aSheet) {
 
   this.populated = false;
   this.populating = false;
-  this.size = this.ruleCount > 8 ? 'docCount8' : 'docCount' + this.ruleCount;
+  this.size = 'docCount' + Math.min(8, Math.max(0, this.ruleCount));
 
   // Populated by Templater:
   this.element = null;  // Element which contains the 'open' class

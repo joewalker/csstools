@@ -35,61 +35,189 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var styleLogic = {
-  _impl: 'liteStyleLogic',
+(function() {
+  /**
+   * Check if the given DOM CSS object holds an allowed media.
+   * Currently we only allow media screen or all.
+   * @param {CSSStyleSheet|CSSImportRule|CSSMediaRule} domObject the
+   * DOM object you want checked
+   * @return {boolean} true iff the media description is allowed
+   */
+  function sheetMediaAllowed(domObject) {
+    var result = false;
+    var media = domObject.media;
 
-  getSheets: function() {
-    return [
-      {
-        systemSheet: false,
-        index: 0,
-        shortSource: "styles.css",
-        ruleCount: 3,
-        href: "http://example.com/page/styles.css"
-      },
-      {
-        systemSheet: false,
-        index: 1,
-        shortSource: "global.css",
-        ruleCount: 15,
-        href: "http://example.com/global.css"
+    if (media.length > 0) {
+      var mediaItem = null;
+      for (var m = 0; m < media.length; m++) {
+        mediaItem = media.item(m).toLowerCase();
+        if (mediaItem === sheetMediaAllowed.Media.SCREEN ||
+            mediaItem === sheetMediaAllowed.Media.ALL) {
+          result = true;
+          break;
+        }
       }
-    ];
-  },
+    } else {
+      result = true;
+    }
 
-  getRules: function(sheetHref) {
-    return [
-      { selectorId: 1, selectorGroup: [ ".group h1", ".sheet h1" ], propertyCount: 3 },
-      { selectorId: 2, selectorGroup: [ "#error" ], propertyCount: 1 },
-      { selectorId: 3, selectorGroup: [ "p.content" ], propertyCount: 5 }
-    ];
-  },
+    return result;
+  };
+  /**
+   * Known media values.
+   * The full list includes braille, embossed, handheld, print, projection,
+   * speech, tty, and tv, but this is only a hack because these are not defined
+   * in the DOM at all.
+   * @see http://www.w3.org/TR/CSS21/media.html#media-types
+   */
+  sheetMediaAllowed.Media = {
+    ALL: "all",
+    SCREEN: "screen"
+  };
 
-  getSettings: function(sheetHref, selectorId) {
-    return [
-      { settingId: 1, property: "color", value: "red" },
-      { settingId: 2, property: "background-color", value: "blue" },
-    ];
-  },
-
-  getAnswer: function(sheetHref, settingId) {
-    return {
-      text: "<p>This rule clashes with another rule because both rules have " +
-          "the same number of IDs, classes and tags, but the other rule was " +
-          "specified later in the page.</p>" +
-          "<p><strong>Note</strong>: Changing rules can <a href='#'>affect " +
-          "many elements</a>.</p>" +
-          "<p><strong>Note</strong>: For detail, see <a href='#'>how CSS " +
-          "specificity works</a>.</p>"
-          /*
-           * To promote this rule either add IDs, " +
-          "classes or tags to this rule, or remove them from the other, or " +
-          "move this rule down the page, past the other rule.
-           */
-      };
+  /**
+   * Is the given property sheet a system (user agent) stylesheet?
+   * @param {CSSStyleSheet} url The href of a stylesheet
+   * @return {boolean} true iff the given stylesheet is a system stylesheet
+   */
+  function isSystemStyleSheet(url) {
+    if (!url) return false;
+    if (url.length === 0) return true;
+    if (url[0] === 'h') return false;
+    if (url.substr(0, 9) === "resource:") return true;
+    if (url.substr(0, 7) === "chrome:") return true;
+    if (url === "XPCSafeJSObjectWrapper.cpp") return true;
+    if (url.substr(0, 6) === "about:") return true;
+    return false;
   }
-};
 
-if (this.exports) {
-  exports.styleLogic = styleLogic;
-}
+  /**
+   * Get a shorter version of a href.
+   * TODO: Make this guarantee uniqueness
+   */
+  function getShortSource(href) {
+    // Short version of href for use in select boxes etc.
+    if (!href) {
+      // Use a string like "inline" if there is no source href
+      return "inline";
+    }
+    else {
+      return href.split("/").slice(-1);
+      /*
+      // We try, in turn, the filename, filePath, query string, whole thing
+      var url = Cc["@mozilla.org/network/io-service;1"].
+          getService(Ci["nsIIOService2"]).
+          newURI(this.domSheet.href, null, null);
+      url = url.QueryInterface(Ci.nsIURL);
+
+      if (url.fileName) {
+        return url.fileName;
+      }
+      else {
+        if (url.filePath) {
+          return url.filePath;
+        }
+        else {
+          if (url.query) {
+            return url.query;
+          }
+          else {
+            return this.domSheet.href;
+          }
+        }
+      }
+      */
+    }
+  }
+
+  /**
+   * Exported function to list the sheets on the current page. Sheets are only
+   * included even if they are disabled, or if their media type is allowed.
+   * System sheets are marked and excluded from the doctor UI.
+   */
+  function getSheets() {
+    var sheets = [];
+    Array.prototype.forEach.call(document.styleSheets, function(domSheet) {
+      addSheet(sheets, domSheet);
+    });
+    return sheets;
+  }
+
+  /**
+   * Add one sheet object into the collection for the given domSheet, and for
+   * each sheet imported using CSS import rules.
+   */
+  function addSheet(sheets, domSheet) {
+    var sheet = {
+      index: sheets.length,
+      href: domSheet.href,
+      shortSource: getShortSource(domSheet.href),
+      systemSheet: isSystemStyleSheet(domSheet.href)
+    };
+
+    if (!sheet.href) {
+      sheet.href = domSheet.ownerNode.ownerDocument.location;
+    }
+
+    try {
+      sheet.ruleCount = domSheet.cssRules.length;
+    }
+    catch (ex) {
+      // For system stylesheets
+      sheet.ruleCount = -1;
+    }
+
+    sheets.push(sheet);
+
+    // Find import rules.
+    try {
+      Array.prototype.forEach.call(domSheet.cssRules, function(domRule) {
+        if (domRule.type == CSSRule.IMPORT_RULE && domRule.styleSheet) {
+          addSheet(sheets, domRule.styleSheet);
+        }
+      }, this);
+    }
+    catch (ex) {
+      // For system stylesheets.
+    }
+  }
+
+  var styleLogic = {
+    _impl: 'liteStyleLogic',
+    getSheets: getSheets,
+
+    getRules: function(sheetHref) {
+      return [
+        { selectorId: 1, selectorGroup: [ ".group h1", ".sheet h1" ], propertyCount: 3 },
+        { selectorId: 2, selectorGroup: [ "#error" ], propertyCount: 1 },
+        { selectorId: 3, selectorGroup: [ "p.content" ], propertyCount: 5 }
+      ];
+    },
+
+    getSettings: function(sheetHref, selectorId) {
+      return [
+        { settingId: 1, property: "color", value: "red" },
+        { settingId: 2, property: "background-color", value: "blue" },
+      ];
+    },
+
+    getAnswer: function(sheetHref, settingId) {
+      return {
+        text: "<p>This rule clashes with another rule because both rules have " +
+            "the same number of IDs, classes and tags, but the other rule was " +
+            "specified later in the page.</p>" +
+            "<p><strong>Note</strong>: Changing rules can <a href='#'>affect " +
+            "many elements</a>.</p>" +
+            "<p><strong>Note</strong>: For detail, see <a href='#'>how CSS " +
+            "specificity works</a>.</p>"
+            /*
+             * To promote this rule either add IDs, " +
+            "classes or tags to this rule, or remove them from the other, or " +
+            "move this rule down the page, past the other rule.
+             */
+        };
+    }
+  };
+
+  window.styleLogic = styleLogic;
+})();
