@@ -1,9 +1,9 @@
 
-Create a basic lite browser backend
-Make it work in Firefox
-Create a smart gecko backend
-Fix up the inspector part
-Style review
+Try out a better UI layout
+How do we get chrome privs in a page-mod?
+Implement getRules in lite
+Start to resurrect the Inspector part
+
 
 UI Issues
 =========
