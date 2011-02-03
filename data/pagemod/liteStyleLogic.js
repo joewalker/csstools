@@ -203,18 +203,14 @@
 
     getAnswer: function(sheetHref, settingId) {
       return {
-        text: "<p>This rule clashes with another rule because both rules have " +
-            "the same number of IDs, classes and tags, but the other rule was " +
-            "specified later in the page.</p>" +
+        text: "<p>(Example) This rule clashes with the rule at style.css:34 " +
+            "because both rules have the same number of IDs, classes and tags, " +
+            "but the other rule was specified later in the page.</p>" +
+            "<p>To fix it, <a href='#'>make this rule more specific</a>.</p>" +
             "<p><strong>Note</strong>: Changing rules can <a href='#'>affect " +
             "many elements</a>.</p>" +
             "<p><strong>Note</strong>: For detail, see <a href='#'>how CSS " +
             "specificity works</a>.</p>"
-            /*
-             * To promote this rule either add IDs, " +
-            "classes or tags to this rule, or remove them from the other, or " +
-            "move this rule down the page, past the other rule.
-             */
         };
     }
   };
