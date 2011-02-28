@@ -61,7 +61,8 @@
 .docSheetOpen > .docSheet {
   font-weight: bold;
   color: #008;
-  background-image: url(images/blank22-arrow.png);
+  background-image: none;
+  padding-left: 0;
 }
 
 .docCount0 { background-image: url(images/blank22-0.png); }
