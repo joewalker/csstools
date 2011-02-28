@@ -95,14 +95,15 @@
    * Get a shorter version of a href.
    * TODO: Make this guarantee uniqueness
    */
-  function getShortSource(href) {
+  function getShortSource(domSheet) {
     // Short version of href for use in select boxes etc.
-    if (!href) {
+    if (!domSheet.href) {
       // Use a string like "inline" if there is no source href
-      return "inline";
+      console.log(domSheet);
+      return "inline <style>";
     }
     else {
-      return href.split("/").slice(-1);
+      return domSheet.href.split("/").slice(-1);
       /*
       // We try, in turn, the filename, filePath, query string, whole thing
       var url = Cc["@mozilla.org/network/io-service;1"].
@@ -151,7 +152,7 @@
     var sheet = {
       index: sheets.length,
       href: domSheet.href,
-      shortSource: getShortSource(domSheet.href),
+      shortSource: getShortSource(domSheet),
       systemSheet: isSystemStyleSheet(domSheet.href)
     };
 
@@ -164,7 +165,7 @@
     }
     catch (ex) {
       // For system stylesheets
-      sheet.ruleCount = -1;
+      sheet.ruleCount = 0;
     }
 
     sheets.push(sheet);
