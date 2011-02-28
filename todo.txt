@@ -18,13 +18,8 @@ From doctor.html:
   * Reduce the top border?
 * On open, close the other things at a similar level
 
-The arrow isn't right. Maybe the arrow in blank22-arrow should point down not
-diagonally.
 The idea is that the icon is the minimized file which expands, so it shouldn't
-be 'there' when expanded.
-The problem is that having nothing in it's space looks strange because then you
-have a title which seems to be inexplicably hanging in space. So we added the
-arrow, but that's too much visual noise.
+be 'there' when expanded, but this isn't working just right now.
 
 * Try putting icons on right hand side (probably lined up in a table?)
 
