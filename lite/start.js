@@ -162,6 +162,8 @@ var startCssDoctorLite = null;
    * A helper to allow us to get a handle on an element
    */
   LiteBal.prototype.pickElement = function(aCallback) {
+    window.alert('Click on an element to inspect');
+    /*
     var selector = window.prompt('Enter a selector that uniquely identifies an element, or leave to select with a click', '<select with mouse>');
     if (!selector) {
       console.log('Aborted element selection');
@@ -174,6 +176,7 @@ var startCssDoctorLite = null;
     if (selectingElement) {
       throw new Error('Already picking element');
     }
+    */
 
     selectingElement = true;
     selectedElement = null;
@@ -201,7 +204,6 @@ var startCssDoctorLite = null;
         var panel = host.createPanel({
           title: 'CSS Doctor',
           contents: 'data/doctor.html',
-          css: [ 'data/doctor.css' ],
           onload: function() {
             /*
             var surrogate = new Surrogate('loopback', {

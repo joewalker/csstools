@@ -10,6 +10,7 @@
    */
   function Panel(host, options) {
     this.host = host;
+    this.elements = [];
     Object.keys(options).forEach(function(key) {
       this[key] = options[key];
     }, this);
@@ -22,10 +23,13 @@
    * DOM utility to do something like innerHTML without destroying the contents
    * of what's already in parent.
    */
-  function appendHtmlToBody(parent, data) {
+  function appendHtmlToBody(parent, data, elements) {
     var temp = document.createElement('div');
     temp.innerHTML = data;
     while (temp.hasChildNodes()) {
+      if (elements) {
+        elements.push(temp.firstChild);
+      }
       parent.appendChild(temp.firstChild);
     }
   }
@@ -80,7 +84,20 @@
     titleEle.innerHTML = panel.title;
     this.bal.requireResource(panel.contents, function(data) {
       container.innerHTML = '';
-      appendHtmlToBody(container, data);
+      appendHtmlToBody(container, data, panel.elements);
+
+      panel.elements.forEach(function(element) {
+        if (element.querySelectorAll) {
+          var nodeList = element.querySelectorAll('LINK');
+          Array.prototype.forEach.call(nodeList, function(link) {
+            link.setAttribute('href', 'data/' + link.getAttribute('href'));
+          });
+          if (element.nodeName === 'LINK') {
+            element.setAttribute('href', 'data/' + element.getAttribute('href'));
+          }
+        }
+      }, this);
+
       checkLoaded();
     }.bind(this));
 
