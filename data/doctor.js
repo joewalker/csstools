@@ -12,9 +12,9 @@
 function doctor(inspectedCssName, styleLogic, Templater) {
   doctor.styleLogic = styleLogic;
   doctor.Templater = Templater;
+  doctor.inspectedCssName = inspectedCssName;
 
   doctor.styleLogic.getSheets(function(sheets) {
-    console.log(sheets);
     var data = {
       inspected: inspectedCssName,
       sheetViews: sheets.map(function(sheet) {
@@ -141,7 +141,7 @@ SettingView.prototype = {
       }
 
       this.populating = true;
-      doctor.styleLogic.getAnswer(this.id, function(answer) {
+      doctor.styleLogic.getAnswer(doctor.inspectedCssName, this.id, function(answer) {
         this.answerView = new AnswerView(answer);
 
         doctor.Templater.template('docTemplateAnswer', this.answerEle, this);

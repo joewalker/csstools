@@ -211,6 +211,47 @@
   }
 
   /**
+   *
+   */
+  var answerRules = [
+    function(element, sheet, rule, setting) {
+      if (sheet.domSheet.disabled) {
+        return "<p>This rule does not work because it is in a stylesheet that" +
+            " is marked as disabled. Note this could have happened either in" +
+            " original HTML or using JavaScript.</p>";
+      }
+    }
+  ];
+
+  /**
+   *
+   */
+  function findAnswer(inspectedCssName, sheet, rule, setting, options) {
+    var element = document.querySelector(inspectedCssName);
+    var actual = window.getComputedStyle(element, null)
+        .getPropertyValue(setting.exposed.property);
+
+    var intro = "<p>You've asked why " + setting.exposed.property + "=" +
+        setting.exposed.value + " has not applied to " + inspectedCssName +
+        ", which has an actual value of " + setting.exposed.property + "=" +
+        actual + "</p>";
+
+    var answers = [];
+    answerRules.forEach(function(answerRule) {
+      var answer = answerRule(element, sheet, rule, setting);
+      if (answer) {
+        answers.push(answer);
+      }
+    });
+
+    if (answers.length === 0) {
+      answers.push("<p>We have no clue why this doesn't work.</p>");
+    }
+
+    return intro + answers.join("");
+  }
+
+  /**
    * Implementation of the StyleLogic interface
    */
   function StyleLogic() {
@@ -282,17 +323,27 @@
    * Exported function to explain the reason why a setting was not properly
    * applied to an element.
    */
-  StyleLogic.prototype.getAnswer = function(settingId) {
-    return {
-      text: "<p>(Example) This rule clashes with the rule at style.css:34 " +
-          "because both rules have the same number of IDs, classes and tags, " +
-          "but the other rule was specified later in the page.</p>" +
-          "<p>To fix it, <a href='#'>make this rule more specific</a>.</p>" +
-          "<p><strong>Note</strong>: Changing rules can <a href='#'>affect " +
-          "many elements</a>.</p>" +
-          "<p><strong>Note</strong>: For detail, see <a href='#'>how CSS " +
-          "specificity works</a>.</p>"
-    };
+  StyleLogic.prototype.getAnswer = function(inspectedCssName, settingId) {
+    var element = document.querySelector(inspectedCssName);
+    if (!element) {
+      throw new Error("Element " + inspectedCssName + " not found");
+    }
+    var sheetId = settingId.split("-")[0];
+    var sheet = this.sheets[sheetId];
+    if (!sheet) {
+      throw new Error("Sheet " + sheetId + " not found.");
+    }
+    var ruleId = settingId.split("-").slice(0, 2).join("-");
+    var rule = sheet.rules[ruleId];
+    if (!rule) {
+      throw new Error("Rule " + ruleId + " not found.");
+    }
+    var setting = rule.settings[settingId];
+    if (!setting) {
+      throw new Error("Setting " + settingId + " not found.");
+    }
+
+    return { text: findAnswer(inspectedCssName, sheet, rule, setting) };
   };
 
   window.styleLogic = new StyleLogic();

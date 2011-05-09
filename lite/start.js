@@ -201,11 +201,28 @@ var startCssDoctorLite = null;
       var host = new OverlayPanelHost(bal);
       bal.pickElement(function(element) {
 
+        var id = element.id;
+        if (!id) {
+          var i = 0;
+          while (true) {
+            id = "-moz-cssi-" + element.nodeName + i;
+            if (!element.ownerDocument.getElementById(id)) {
+              element.id = id;
+              break;
+            }
+            i++;
+          }
+        }
+
+        if (!id) {
+          throw new Error("failed to find temporary id.");
+        }
+
         var panel = host.createPanel({
           title: 'CSS Doctor',
           contents: 'data/doctor.html',
           onload: function() {
-            /*
+            //*
             var surrogate = new Surrogate('loopback', {
               name: 'loopback',
               logLevel: Surrogate.LogLevel.WARNING,
@@ -213,7 +230,8 @@ var startCssDoctorLite = null;
             });
             surrogate.supply('styleLogic', styleLogic);
             styleLogic = surrogate.require('styleLogic');
-            */
+            //*/
+            /*
             var addonPipe = Surrogate.createPipe();
             new Surrogate(addonPipe.left, {
               name: 'toAddon  ',
@@ -237,10 +255,12 @@ var startCssDoctorLite = null;
               logLevel: Surrogate.LogLevel.WARNING,
               defaultErrback: Surrogate.simpleErrback
             }).require('styleLogic');
+            styleLogic = proxyStyleLogic
+            //*/
 
             var inspectedCssName = element.tagName.toLowerCase() +
-                '#' + (element.id || 'tempId');
-            doctor(inspectedCssName, proxyStyleLogic, Templater);
+                '#' + element.id;
+            doctor(inspectedCssName, styleLogic, Templater);
           }
         });
         panel.show();
