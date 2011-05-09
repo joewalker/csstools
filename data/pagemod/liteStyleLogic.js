@@ -100,7 +100,7 @@
     if (!domSheet.href) {
       // Use a string like "inline" if there is no source href
       console.log(domSheet);
-      return "inline <style>";
+      return "inline style element";
     }
     else {
       return domSheet.href.split("/").slice(-1);
@@ -132,43 +132,29 @@
   }
 
   /**
-   * Exported function to list the sheets on the current page. Sheets are only
-   * included even if they are disabled, or if their media type is allowed.
-   * System sheets are marked and excluded from the doctor UI.
-   */
-  function getSheets() {
-    var sheets = [];
-    Array.prototype.forEach.call(document.styleSheets, function(domSheet) {
-      addSheet(sheets, domSheet);
-    });
-    return sheets;
-  }
-
-  /**
    * Add one sheet object into the collection for the given domSheet, and for
    * each sheet imported using CSS import rules.
    */
   function addSheet(sheets, domSheet) {
-    var sheet = {
-      index: sheets.length,
-      href: domSheet.href,
-      shortSource: getShortSource(domSheet),
-      systemSheet: isSystemStyleSheet(domSheet.href)
-    };
-
-    if (!sheet.href) {
-      sheet.href = domSheet.ownerNode.ownerDocument.location;
-    }
-
+    var href = domSheet.href || domSheet.ownerNode.ownerDocument.location;
+    var ruleCount = 0; // Default for system stylesheets
     try {
-      sheet.ruleCount = domSheet.cssRules.length;
+      ruleCount = domSheet.cssRules.length;
     }
-    catch (ex) {
-      // For system stylesheets
-      sheet.ruleCount = 0;
-    }
+    catch (ex) { }
+    var id = "s" + Object.keys(sheets).length;
 
-    sheets.push(sheet);
+    sheets[id] = {
+      rules: null, // populateRules() will populate with map of id->rule
+      domSheet: domSheet,
+      exposed: {
+        id: id,
+        href: href,
+        shortSource: getShortSource(domSheet),
+        systemSheet: isSystemStyleSheet(domSheet.href),
+        ruleCount: ruleCount
+      }
+    };
 
     // Find import rules.
     try {
@@ -183,38 +169,131 @@
     }
   }
 
-  var styleLogic = {
-    _impl: 'liteStyleLogic',
-    getSheets: getSheets,
-
-    getRules: function(sheetHref) {
-      return [
-        { selectorId: 1, selectorGroup: [ ".group h1", ".sheet h1" ], propertyCount: 3 },
-        { selectorId: 2, selectorGroup: [ "#error" ], propertyCount: 1 },
-        { selectorId: 3, selectorGroup: [ "p.content" ], propertyCount: 5 }
-      ];
-    },
-
-    getSettings: function(sheetHref, selectorId) {
-      return [
-        { settingId: 1, property: "color", value: "red" },
-        { settingId: 2, property: "background-color", value: "blue" },
-      ];
-    },
-
-    getAnswer: function(sheetHref, settingId) {
-      return {
-        text: "<p>(Example) This rule clashes with the rule at style.css:34 " +
-            "because both rules have the same number of IDs, classes and tags, " +
-            "but the other rule was specified later in the page.</p>" +
-            "<p>To fix it, <a href='#'>make this rule more specific</a>.</p>" +
-            "<p><strong>Note</strong>: Changing rules can <a href='#'>affect " +
-            "many elements</a>.</p>" +
-            "<p><strong>Note</strong>: For detail, see <a href='#'>how CSS " +
-            "specificity works</a>.</p>"
+  /**
+   * Dig through the rules in domSheet.cssRules and expose to the CssDoctor UI.
+   */
+  function populateRules(sheet) {
+    sheet.rules = {};
+    Array.prototype.forEach.call(sheet.domSheet.cssRules, function(domRule) {
+      if (domRule.type == CSSRule.STYLE_RULE) {
+        var id = sheet.exposed.id + "-r" + Object.keys(sheet.rules).length;
+        sheet.rules[id] = {
+          settings: null, // populateSettings() populates to map of id->setting
+          domRule: domRule,
+          exposed: {
+            id: id,
+            selectorGroup: domRule.selectorText.split(","),
+            propertyCount: domRule.length
+          }
         };
+      }
+    }, this);
+  }
+
+  /**
+   * Dig through the property/value pairs (i.e. settings) in a CSSRule to
+   * expose to the CssDoctor UI.
+   */
+  function populateSettings(rule) {
+    rule.settings = {};
+    var style = rule.domRule.style;
+    for (var i = 0; i < style.length; i++) {
+      var propertyName = style.item(i);
+      var id = rule.exposed.id + "-p" + Object.keys(rule.settings).length;
+      rule.settings[id] = {
+        exposed: {
+          id: id,
+          property: propertyName,
+          value: style.getPropertyValue(propertyName)
+        }
+      };
     }
+  }
+
+  /**
+   * Implementation of the StyleLogic interface
+   */
+  function StyleLogic() {
+    // Object<sheetId, sheet>, populated by getSheets()
+    this.sheets = null;
   };
 
-  window.styleLogic = styleLogic;
+  /**
+   * Exported function to list the sheets on the current page. Sheets are
+   * included even if they are disabled, or if their media type is disallowed.
+   * However, system sheets are marked and excluded from the doctor UI.
+   */
+  StyleLogic.prototype.getSheets = function getSheets() {
+    if (!this.sheets) {
+      this.sheets = {};
+      Array.prototype.forEach.call(document.styleSheets, function(domSheet) {
+        addSheet(this.sheets, domSheet);
+      }.bind(this));
+    }
+
+    return Object.keys(this.sheets).map(function(sheet) {
+      return this.sheets[sheet].exposed;
+    }.bind(this));
+  };
+
+  /**
+   * Exported function to list the rules in a stylesheet.
+   */
+  StyleLogic.prototype.getRules = function(sheetId) {
+    var sheet = this.sheets[sheetId];
+    if (!sheet) {
+      throw new Error("Sheet " + sheetId + " not found.");
+    }
+
+    if (!sheet.rules) {
+      populateRules(sheet);
+    }
+
+    return Object.keys(sheet.rules).map(function(rule) {
+      return sheet.rules[rule].exposed;
+    }.bind(this));
+  };
+
+  /**
+   * Exported function to list the property/value pairs (i.e. settings) in a
+   * stylesheet.
+   */
+  StyleLogic.prototype.getSettings = function(ruleId) {
+    var sheetId = ruleId.split("-")[0];
+    var sheet = this.sheets[sheetId];
+    if (!sheet) {
+      throw new Error("Sheet " + sheetId + " not found.");
+    }
+    var rule = sheet.rules[ruleId];
+    if (!rule) {
+      throw new Error("Rule " + ruleId + " not found.");
+    }
+
+    if (!rule.settings) {
+      populateSettings(rule);
+    }
+
+    return Object.keys(rule.settings).map(function(setting) {
+      return rule.settings[setting].exposed;
+    }.bind(this));
+  };
+
+  /**
+   * Exported function to explain the reason why a setting was not properly
+   * applied to an element.
+   */
+  StyleLogic.prototype.getAnswer = function(settingId) {
+    return {
+      text: "<p>(Example) This rule clashes with the rule at style.css:34 " +
+          "because both rules have the same number of IDs, classes and tags, " +
+          "but the other rule was specified later in the page.</p>" +
+          "<p>To fix it, <a href='#'>make this rule more specific</a>.</p>" +
+          "<p><strong>Note</strong>: Changing rules can <a href='#'>affect " +
+          "many elements</a>.</p>" +
+          "<p><strong>Note</strong>: For detail, see <a href='#'>how CSS " +
+          "specificity works</a>.</p>"
+    };
+  };
+
+  window.styleLogic = new StyleLogic();
 })();

@@ -30,7 +30,7 @@ function doctor(inspectedCssName, styleLogic, Templater) {
  * A container to view us easy access to display data from a CssRule
  */
 function SheetView(aSheet) {
-  var props = [ 'systemSheet', 'index', 'shortSource', 'ruleCount', 'href' ];
+  var props = [ 'systemSheet', 'id', 'shortSource', 'ruleCount', 'href' ];
   props.forEach(function(prop) {
     this[prop] = aSheet[prop];
   }, this);
@@ -59,10 +59,10 @@ SheetView.prototype = {
       }
 
       this.populating = true;
-      doctor.styleLogic.getRules(this.href, function(aRules) {
+      doctor.styleLogic.getRules(this.id, function(aRules) {
         this.ruleViews = [];
         this.ruleViews = aRules.map(function(rule) {
-          return new RuleView(this.href, rule);
+          return new RuleView(this, rule);
         }, this);
 
         doctor.Templater.template('docTemplateRules', this.rulesEle, this);
@@ -78,9 +78,9 @@ SheetView.prototype = {
 /**
  * A RuleView represents a rule (selector group and set of property/values)
  */
-function RuleView(href, data) {
-  this.href = href;
-  this.id = data.selectorId;
+function RuleView(sheet, data) {
+  this.sheet = sheet;
+  this.id = data.id;
   this.selectorGroup = data.selectorGroup;
   this.selectors = this.selectorGroup.join(', ');
   this.propertyCount = data.propertyCount;
@@ -101,10 +101,10 @@ RuleView.prototype = {
       }
 
       this.populating = true;
-      doctor.styleLogic.getSettings(this.href, this.id, function(settings) {
+      doctor.styleLogic.getSettings(this.id, function(settings) {
         this.settingViews = [];
         this.settingViews = settings.map(function(setting) {
-          return new SettingView(this.href, setting);
+          return new SettingView(this, setting);
         }, this);
 
         doctor.Templater.template('docTemplateSettings', this.settingsEle, this);
@@ -120,9 +120,9 @@ RuleView.prototype = {
 /**
  * A SettingView represents a property/value pair
  */
-function SettingView(href, data) {
-  this.href = href;
-  this.id = data.settingId;
+function SettingView(rule, data) {
+  this.rule = rule;
+  this.id = data.id;
   this.property = data.property;
   this.value = data.value;
   // Injected by template in RuleView.click
@@ -141,7 +141,7 @@ SettingView.prototype = {
       }
 
       this.populating = true;
-      doctor.styleLogic.getAnswer(this.href, this.id, function(answer) {
+      doctor.styleLogic.getAnswer(this.id, function(answer) {
         this.answerView = new AnswerView(answer);
 
         doctor.Templater.template('docTemplateAnswer', this.answerEle, this);
