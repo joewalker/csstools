@@ -99,7 +99,6 @@
     // Short version of href for use in select boxes etc.
     if (!domSheet.href) {
       // Use a string like "inline" if there is no source href
-      console.log(domSheet);
       return "inline style element";
     }
     else {
@@ -142,7 +141,7 @@
       ruleCount = domSheet.cssRules.length;
     }
     catch (ex) { }
-    var id = "s" + Object.keys(sheets).length;
+    var id = "s" + (domSheet.ownerNode.id ? domSheet.ownerNode.id : Object.keys(sheets).length);
 
     sheets[id] = {
       rules: null, // populateRules() will populate with map of id->rule
@@ -167,6 +166,15 @@
     catch (ex) {
       // For system stylesheets.
     }
+  }
+
+  /**
+   * Dig through the sheets in the current document
+   */
+  function populateSheets(sheets) {
+    Array.prototype.forEach.call(document.styleSheets, function(domSheet) {
+      addSheet(sheets, domSheet);
+    });
   }
 
   /**
@@ -211,7 +219,8 @@
   }
 
   /**
-   *
+   * An array on functions each of which returns a string if it know why the
+   * specified CSS property/value doesn't apply to the given element.
    */
   var answerRules = [
     /**
@@ -219,9 +228,8 @@
      */
     function(element, sheet, rule, setting) {
       if (sheet.domSheet.disabled) {
-        return "<p>This rule does not work because it is in a stylesheet that" +
-            " is marked as disabled. Note this could have happened either in" +
-            " original HTML or using JavaScript.</p>";
+        return "This rule does not work because it is in a stylesheet that" +
+            " has been marked as disabled using JavaScript.";
       }
     },
     /**
@@ -235,28 +243,21 @@
       if (mediaList.length > 0 &&
           Array.prototype.indexOf(mediaList, "all") == -1 &&
           Array.prototype.indexOf(mediaList, currentMediaType) == -1) {
-        return "<p>This rule does not work because it is in a stylesheet with" +
+        return "This rule does not work because it is in a stylesheet with" +
             " a media type of '" + mediaList.mediaText + "', which does not" +
             " include either 'all' or '" + currentMediaType + "' (the current" +
-            " media type).</p>";
+            " media type).";
       }
     }
   ];
 
   /**
-   *
+   * Look through the rules specified in answerRules for a match.
    */
-  function findAnswer(inspectedCssName, sheet, rule, setting, options) {
-    var element = document.querySelector(inspectedCssName);
-    var actual = window.getComputedStyle(element, null)
-        .getPropertyValue(setting.exposed.property);
-
-    var intro = "<p>You've asked why " + setting.exposed.property + "=" +
-        setting.exposed.value + " has not applied to " + inspectedCssName +
-        ", which has an actual value of " + setting.exposed.property + "=" +
-        actual + "</p>";
-
+  function findAnswer(element, name, sheet, rule, setting, options) {
+    options = options || {};
     var answers = [];
+
     answerRules.forEach(function(answerRule) {
       var answer = answerRule(element, sheet, rule, setting);
       if (answer) {
@@ -265,10 +266,19 @@
     });
 
     if (answers.length === 0) {
-      answers.push("<p>We have no clue why this doesn't work.</p>");
+      answers.push("We have no clue why this doesn't work.");
     }
 
-    return intro + answers.join("");
+    if (!options.skipIntro) {
+      var actual = window.getComputedStyle(element, null)
+          .getPropertyValue(setting.exposed.property);
+      answers.unshift("You've asked why " + setting.exposed.property + "=" +
+          setting.exposed.value + " has not applied to " + name +
+          ", which has an actual value of " + setting.exposed.property + "=" +
+          actual);
+    }
+
+    return answers;
   }
 
   /**
@@ -287,9 +297,7 @@
   StyleLogic.prototype.getSheets = function getSheets() {
     if (!this.sheets) {
       this.sheets = {};
-      Array.prototype.forEach.call(document.styleSheets, function(domSheet) {
-        addSheet(this.sheets, domSheet);
-      }.bind(this));
+      populateSheets(this.sheets);
     }
 
     return Object.keys(this.sheets).map(function(sheet) {
@@ -343,27 +351,57 @@
    * Exported function to explain the reason why a setting was not properly
    * applied to an element.
    */
-  StyleLogic.prototype.getAnswer = function(inspectedCssName, settingId) {
-    var element = document.querySelector(inspectedCssName);
-    if (!element) {
-      throw new Error("Element " + inspectedCssName + " not found");
+  StyleLogic.prototype.getAnswer = function(selectorOrElement, settingId, options) {
+    var element, name;
+    if (typeof selectorOrElement == "string") {
+      name = selectorOrElement;
+      element = document.querySelector(selectorOrElement);
+      if (!element) {
+        throw new Error("Element " + selectorOrElement + " not found");
+      }
     }
+    else {
+      element = selectorOrElement;
+      name = element.id ?
+          element.nodeName + "#" + element.id :
+          "Selected Element";
+    }
+
     var sheetId = settingId.split("-")[0];
+    // Normally this.sheets will have been setup by a call to getSheets() but
+    // we might be coming in directly from the test page
+    if (!this.sheets) {
+      this.sheets = {};
+      populateSheets(this.sheets);
+    }
     var sheet = this.sheets[sheetId];
     if (!sheet) {
       throw new Error("Sheet " + sheetId + " not found.");
     }
     var ruleId = settingId.split("-").slice(0, 2).join("-");
+    // See above on this.sheets/getSheets()
+    if (!sheet.rules) {
+      populateRules(sheet);
+    }
     var rule = sheet.rules[ruleId];
     if (!rule) {
       throw new Error("Rule " + ruleId + " not found.");
+    }
+    // See above on this.sheets/getSheets()
+    if (!rule.settings) {
+      populateSettings(rule);
     }
     var setting = rule.settings[settingId];
     if (!setting) {
       throw new Error("Setting " + settingId + " not found.");
     }
 
-    return { text: findAnswer(inspectedCssName, sheet, rule, setting) };
+    var answers = findAnswer(element, name, sheet, rule, setting, options);
+
+    return {
+      answers: answers,
+      html: "<p>" + answers.join("</p><p>") + "</p>"
+    };
   };
 
   window.styleLogic = new StyleLogic();

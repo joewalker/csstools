@@ -89,7 +89,7 @@ var styleLogic = {
       throw new Error("Missing settingId");
     }
     return {
-      text: "<p>(Example) This rule clashes with the rule at style.css:34 " +
+      html: "<p>(Example) This rule clashes with the rule at style.css:34 " +
           "because both rules have the same number of IDs, classes and tags, " +
           "but the other rule was specified later in the page.</p>" +
           "<p>To fix it, <a href='#'>make this rule more specific</a>.</p>" +

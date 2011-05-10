@@ -39,7 +39,7 @@
  * The start point for CssDoctorLite
  * Setup in the self-exec function below
  */
-var startCssDoctorLite = null;
+var CssDoctorLite = null;
 
 (function() {
   /**
@@ -101,7 +101,9 @@ var startCssDoctorLite = null;
    */
   LiteBal.prototype.addScriptTag = function(src, callback, context) {
     if (src == null) {
-      callback.call(context);
+      if (callback) {
+        callback.call(context);
+      }
       return;
     }
 
@@ -110,13 +112,13 @@ var startCssDoctorLite = null;
       src.forEach(function(src) {
         this.addScriptTag(src, function() {
           outstanding--;
-          if (outstanding === 0) {
+          if (outstanding === 0 && callback) {
             callback.call(context);
           }
         });
       }, this);
 
-      if (src.length === 0) {
+      if (src.length === 0 &&  callback) {
         callback.call(context);
       }
       return;
@@ -188,8 +190,16 @@ var startCssDoctorLite = null;
   /**
    * start point to setup a CssDoctor using a Lite BAL
    */
-  startCssDoctorLite = function() {
-    var bal = new LiteBal();
+  CssDoctorLite = {};
+
+  CssDoctorLite.load = function(callback) {
+    if (CssDoctorLite.loading) {
+      callback();
+      return;
+    }
+
+    CssDoctorLite.loading = true;
+    CssDoctorLite.bal = new LiteBal();
     var scripts = [
       'lib/surrogate.js',
       'data/pagemod/liteStyleLogic.js',
@@ -197,74 +207,80 @@ var startCssDoctorLite = null;
       'data/domtemplate.js',
       'lite/overlay.js'
     ];
-    bal.addScriptTag(scripts, function() {
-      var host = new OverlayPanelHost(bal);
-      bal.pickElement(function(element) {
+    CssDoctorLite.bal.addScriptTag(scripts, callback, CssDoctorLite.bal);
+  };
 
-        var id = element.id;
-        if (!id) {
-          var i = 0;
-          while (true) {
-            id = "-moz-cssi-" + element.nodeName + i;
-            if (!element.ownerDocument.getElementById(id)) {
-              element.id = id;
-              break;
-            }
-            i++;
+  CssDoctorLite.onload = function() {
+    var host = new OverlayPanelHost(CssDoctorLite.bal);
+    CssDoctorLite.bal.pickElement(function(element) {
+
+      var id = element.id;
+      if (!id) {
+        var i = 0;
+        while (true) {
+          id = "-moz-cssdoc-" + element.nodeName + i;
+          if (!element.ownerDocument.getElementById(id)) {
+            element.id = id;
+            break;
           }
+          i++;
         }
+      }
 
-        if (!id) {
-          throw new Error("failed to find temporary id.");
+      if (!id) {
+        throw new Error("failed to find temporary id.");
+      }
+
+      var panel = host.createPanel({
+        title: 'CSS Doctor',
+        contents: 'data/doctor.html',
+        onload: function() {
+          //*
+          var surrogate = new Surrogate('loopback', {
+            name: 'loopback',
+            logLevel: Surrogate.LogLevel.WARNING,
+            defaultErrback: Surrogate.simpleErrback
+          });
+          surrogate.supply('styleLogic', styleLogic);
+          styleLogic = surrogate.require('styleLogic');
+          //*/
+          /*
+          var addonPipe = Surrogate.createPipe();
+          new Surrogate(addonPipe.left, {
+            name: 'toAddon  ',
+            logLevel: Surrogate.LogLevel.WARNING,
+            defaultErrback: Surrogate.simpleErrback
+          }).supply('styleLogic', window.styleLogic);
+          var lacoStyleLogic = new Surrogate(addonPipe.right, {
+            name: 'toPageMod',
+            logLevel: Surrogate.LogLevel.WARNING,
+            defaultErrback: Surrogate.simpleErrback
+          }).require("styleLogic");
+
+          var panelPipe = Surrogate.createPipe();
+          new Surrogate(panelPipe.left, {
+            name: "toPanel  ",
+            logLevel: Surrogate.LogLevel.WARNING,
+            defaultErrback: Surrogate.simpleErrback
+          }).supplyLacoAsync("styleLogic", lacoStyleLogic);
+          var proxyStyleLogic = new Surrogate(panelPipe.right, {
+            name: 'doctor.js',
+            logLevel: Surrogate.LogLevel.WARNING,
+            defaultErrback: Surrogate.simpleErrback
+          }).require('styleLogic');
+          styleLogic = proxyStyleLogic
+          //*/
+
+          var inspectedCssName = element.tagName.toLowerCase() +
+              '#' + element.id;
+          doctor(inspectedCssName, styleLogic, Templater);
         }
-
-        var panel = host.createPanel({
-          title: 'CSS Doctor',
-          contents: 'data/doctor.html',
-          onload: function() {
-            //*
-            var surrogate = new Surrogate('loopback', {
-              name: 'loopback',
-              logLevel: Surrogate.LogLevel.WARNING,
-              defaultErrback: Surrogate.simpleErrback
-            });
-            surrogate.supply('styleLogic', styleLogic);
-            styleLogic = surrogate.require('styleLogic');
-            //*/
-            /*
-            var addonPipe = Surrogate.createPipe();
-            new Surrogate(addonPipe.left, {
-              name: 'toAddon  ',
-              logLevel: Surrogate.LogLevel.WARNING,
-              defaultErrback: Surrogate.simpleErrback
-            }).supply('styleLogic', window.styleLogic);
-            var lacoStyleLogic = new Surrogate(addonPipe.right, {
-              name: 'toPageMod',
-              logLevel: Surrogate.LogLevel.WARNING,
-              defaultErrback: Surrogate.simpleErrback
-            }).require("styleLogic");
-
-            var panelPipe = Surrogate.createPipe();
-            new Surrogate(panelPipe.left, {
-              name: "toPanel  ",
-              logLevel: Surrogate.LogLevel.WARNING,
-              defaultErrback: Surrogate.simpleErrback
-            }).supplyLacoAsync("styleLogic", lacoStyleLogic);
-            var proxyStyleLogic = new Surrogate(panelPipe.right, {
-              name: 'doctor.js',
-              logLevel: Surrogate.LogLevel.WARNING,
-              defaultErrback: Surrogate.simpleErrback
-            }).require('styleLogic');
-            styleLogic = proxyStyleLogic
-            //*/
-
-            var inspectedCssName = element.tagName.toLowerCase() +
-                '#' + element.id;
-            doctor(inspectedCssName, styleLogic, Templater);
-          }
-        });
-        panel.show();
       });
-    }, bal);
+      panel.show();
+    });
+  };
+
+  CssDoctorLite.start = function() {
+    CssDoctorLite.load(CssDoctorLite.onload.bind(CssDoctorLite));
   };
 })();

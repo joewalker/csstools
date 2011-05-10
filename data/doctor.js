@@ -159,6 +159,6 @@ SettingView.prototype = {
  * setting
  */
 function AnswerView(data) {
-  this.text = document.createElement('div');
-  this.text.innerHTML = data.text;
+  this.element = document.createElement('div');
+  this.element.innerHTML = data.html;
 }

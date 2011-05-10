@@ -4,26 +4,72 @@
   <meta charset="UTF-8">
   <meta name="author" content="Joe Walker">
   <title>CSS Doctor Test</title>
-
-  <style>
-  #id { color: red; }
-  .class { color: blue; }
-  body p { color: yellow; }
-  p#id { color: green; }
-  </style>
   <script src="lite/start.js"></script>
+  <style type="text/css">
+  span.demo { color:#AAA; }
+  span.reason { font-style: italic; }
+  </style>
 </head>
 
 <body>
 
-<p id="id" class="class">Some Text</p>
+<h1>CSS Doctor Test Page</h1>
 
-<button onclick="startCssDoctorLite();">CSS Doctor</button>
+<p>This page helps us test the CSS Doctor. It tests 2 parts - the general UI and
+the set of rules.</p>
 
-<div>
-Test:<input/>
-<button>Click</button>
-</div>
+<h2>User Interface</h2>
+
+<p>The UI would normally be invoked from a right-click context menu on the
+element the user wishes to inspect.</p>
+
+<p>For demo simplicity, this is mocked using this button
+<button onclick="CssDoctorLite.start();">CSS Doctor</button> and a left-click on
+the element to inspect.</p>
+
+<p>Be warned - due to the tests below, there is likely to be a large and complex
+set of stylesheets, which could make the UI more cumbersome than it would
+normally be.</p>
+
+<h2>The Rules</h2>
+
+<ul id="rules">
+
+<li data-setting-id="stoBeDisabled-r0-p0">
+  Disabled stylesheet:
+  <style id="toBeDisabled">
+  #testDisabledStylesheet span.demo { color:red; }
+  </style>
+  <script>document.querySelector("#toBeDisabled").disabled = true;</script>
+  <span class="demo">Demo</span>
+  <span class="reason"></span>
+</li>
+
+<li data-setting-id="sinapplicableMedia-r0-p0">
+  Inapplicable Media on Stylesheet:
+  <style id="inapplicableMedia">
+  @media print {
+    #testInapplicableMedia span.demo { color:red; }
+  }
+  </style>
+  <span class="demo">Demo</span>
+  <span class="reason"></span>
+</li>
+
+</ul>
 
 </body>
 </html>
+
+<script>
+CssDoctorLite.load(function() {
+  var testElements = document.querySelectorAll("#rules li");
+  Array.prototype.forEach.call(testElements, function(testElement) {
+    var demo = testElement.querySelector(".demo");
+    var settingId = testElement.getAttribute("data-setting-id");
+    // Warning - this should really be called async through a Surrogate.
+    var answer = styleLogic.getAnswer(demo, settingId, { skipIntro: true });
+    testElement.querySelector(".reason").innerHTML = answer.answers.join("");
+  });
+});
+</script>
