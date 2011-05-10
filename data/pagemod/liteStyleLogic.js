@@ -214,11 +214,31 @@
    *
    */
   var answerRules = [
+    /**
+     * Disabled stylesheet
+     */
     function(element, sheet, rule, setting) {
       if (sheet.domSheet.disabled) {
         return "<p>This rule does not work because it is in a stylesheet that" +
             " is marked as disabled. Note this could have happened either in" +
             " original HTML or using JavaScript.</p>";
+      }
+    },
+    /**
+     * Wrong media type
+     */
+    function(element, sheet, rule, setting) {
+      // TODO: What if we're running this somewhere where the media type is
+      // not screen? Is there an API to get this?
+      var currentMediaType = "screen";
+      var mediaList = sheet.domSheet.media;
+      if (mediaList.length > 0 &&
+          Array.prototype.indexOf(mediaList, "all") == -1 &&
+          Array.prototype.indexOf(mediaList, currentMediaType) == -1) {
+        return "<p>This rule does not work because it is in a stylesheet with" +
+            " a media type of '" + mediaList.mediaText + "', which does not" +
+            " include either 'all' or '" + currentMediaType + "' (the current" +
+            " media type).</p>";
       }
     }
   ];
