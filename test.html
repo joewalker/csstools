@@ -45,7 +45,7 @@ normally be.</p>
   <span class="reason"></span>
 </li>
 
-<li data-setting-id="sinapplicableMedia-r0-p0">
+<li data-setting-id="sinapplicableMedia-m0r0-p0">
   Inapplicable Media on Stylesheet:
   <style id="inapplicableMedia">
   @media print {
@@ -53,6 +53,18 @@ normally be.</p>
   }
   </style>
   <span class="demo">Demo</span>
+  <span class="reason"></span>
+</li>
+
+<li data-setting-id="sworking-r0-p0">
+  Working Rule:
+  <!-- Note: what we don't have working is value normalization, so this will
+  break if you specify the color as 'green' because computed style will still
+  return the value as rgb(...) -->
+  <style id="working">
+    #workingDemo { color:rgb(0, 128, 0); }
+  </style>
+  <span class="demo" id="workingDemo">Demo</span>
   <span class="reason"></span>
 </li>
 

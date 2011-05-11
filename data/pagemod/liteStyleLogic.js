@@ -99,7 +99,8 @@
     // Short version of href for use in select boxes etc.
     if (!domSheet.href) {
       // Use a string like "inline" if there is no source href
-      return "inline style element";
+      return domSheet.ownerNode.id ?
+          "sheet#" + domSheet.ownerNode.id : "inline style element";
     }
     else {
       return domSheet.href.split("/").slice(-1);
@@ -180,20 +181,31 @@
   /**
    * Dig through the rules in domSheet.cssRules and expose to the CssDoctor UI.
    */
-  function populateRules(sheet) {
+  function populateRules(sheet, ruleList, idPrefix, medias) {
+    ruleList = ruleList || sheet.domSheet.cssRules;
+    medias = medias || Array.prototype.slice.call(sheet.domSheet.media, 0);
+    idPrefix = idPrefix || "";
     sheet.rules = {};
-    Array.prototype.forEach.call(sheet.domSheet.cssRules, function(domRule) {
+
+    var mediaIndex = 0;
+    Array.prototype.forEach.call(ruleList, function(domRule) {
       if (domRule.type == CSSRule.STYLE_RULE) {
-        var id = sheet.exposed.id + "-r" + Object.keys(sheet.rules).length;
+        var id = sheet.exposed.id + "-" + idPrefix + "r" + Object.keys(sheet.rules).length;
         sheet.rules[id] = {
           settings: null, // populateSettings() populates to map of id->setting
           domRule: domRule,
+          medias: medias, // die grammar nazis, die
           exposed: {
             id: id,
             selectorGroup: domRule.selectorText.split(","),
             propertyCount: domRule.length
           }
         };
+      } else if (domRule.type == CSSRule.MEDIA_RULE) {
+        var newIdPrefix = idPrefix + "m" + mediaIndex;
+        medias.push.apply(medias, Array.prototype.slice.call(domRule.media, 0));
+        populateRules(sheet, domRule.cssRules, newIdPrefix, medias);
+        mediaIndex++;
       }
     }, this);
   }
@@ -226,7 +238,7 @@
     /**
      * Disabled stylesheet
      */
-    function(element, sheet, rule, setting) {
+    function isDisabledStylesheet(element, sheet, rule, setting) {
       if (sheet.domSheet.disabled) {
         return "This rule does not work because it is in a stylesheet that" +
             " has been marked as disabled using JavaScript.";
@@ -235,18 +247,29 @@
     /**
      * Wrong media type
      */
-    function(element, sheet, rule, setting) {
+    function isWrongMediaType(element, sheet, rule, setting) {
       // TODO: What if we're running this somewhere where the media type is
       // not screen? Is there an API to get this?
       var currentMediaType = "screen";
-      var mediaList = sheet.domSheet.media;
-      if (mediaList.length > 0 &&
-          Array.prototype.indexOf(mediaList, "all") == -1 &&
-          Array.prototype.indexOf(mediaList, currentMediaType) == -1) {
-        return "This rule does not work because it is in a stylesheet with" +
-            " a media type of '" + mediaList.mediaText + "', which does not" +
+      if (rule.medias.length > 0 &&
+          rule.medias.indexOf("all") == -1 &&
+          rule.medias.indexOf(currentMediaType) == -1) {
+        return "This rule does not work because it has the following media " +
+        		" applied to it '" + rule.medias.join(", ") + "', which does not" +
             " include either 'all' or '" + currentMediaType + "' (the current" +
             " media type).";
+      }
+    },
+    /**
+     * Working Rule!
+     */
+    function isWorking(element, sheet, rule, setting) {
+      var actual = window.getComputedStyle(element, null)
+          .getPropertyValue(setting.exposed.property);
+
+      if (setting.exposed.value == actual) {
+        return "The computed value of " + setting.exposed.property + " is" +
+        		" the same as value in the given rule (" + actual + ").";
       }
     }
   ];
@@ -270,12 +293,8 @@
     }
 
     if (!options.skipIntro) {
-      var actual = window.getComputedStyle(element, null)
-          .getPropertyValue(setting.exposed.property);
       answers.unshift("You've asked why " + setting.exposed.property + "=" +
-          setting.exposed.value + " has not applied to " + name +
-          ", which has an actual value of " + setting.exposed.property + "=" +
-          actual);
+          setting.exposed.value + " has not applied to " + name + ".");
     }
 
     return answers;
