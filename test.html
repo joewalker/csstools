@@ -35,22 +35,29 @@ normally be.</p>
 
 <ul id="rules">
 
-<li data-setting-id="stoBeDisabled-r0-p0">
+<li data-setting-id="stoBeDisabled-r0-p0" id="liToBeDisabled">
   Disabled stylesheet:
   <style id="toBeDisabled">
-  #testDisabledStylesheet span.demo { color:red; }
+    #liToBeDisabled span.demo { color:red; }
   </style>
   <script>document.querySelector("#toBeDisabled").disabled = true;</script>
   <span class="demo">Demo</span>
   <span class="reason"></span>
 </li>
 
-<li data-setting-id="sinapplicableMedia-m0r0-p0">
+<li data-setting-id="sinapplicableMedia-m0r0-p0" id="testInapplicableMedia">
   Inapplicable Media on Stylesheet:
   <style id="inapplicableMedia">
-  @media print {
-    #testInapplicableMedia span.demo { color:red; }
-  }
+    @media print { #testInapplicableMedia span.demo { color:red; } }
+  </style>
+  <span class="demo">Demo</span>
+  <span class="reason"></span>
+</li>
+
+<li data-setting-id="sunmatched-r0-p0" id="liUnmatched">
+  Unmatched Selector:
+  <style id="unmatched">
+    #liUnmatched style { color:red; }
   </style>
   <span class="demo">Demo</span>
   <span class="reason"></span>

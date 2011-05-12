@@ -39,13 +39,16 @@
   /**
    * Check if the given DOM CSS object holds an allowed media.
    * Currently we only allow media screen or all.
-   * @param {CSSStyleSheet|CSSImportRule|CSSMediaRule} domObject the
-   * DOM object you want checked
-   * @return {boolean} true iff the media description is allowed
+   *
+   * @param {CSSStyleSheet|CSSImportRule|CSSMediaRule} aDomObject
+   *        The DOM object you want checked
+   * @return {boolean}
+   *         true iff the media description is allowed
    */
-  function sheetMediaAllowed(domObject) {
+  function sheetMediaAllowed(aDomObject)
+  {
     var result = false;
-    var media = domObject.media;
+    var media = aDomObject.media;
 
     if (media.length > 0) {
       var mediaItem = null;
@@ -68,42 +71,52 @@
    * The full list includes braille, embossed, handheld, print, projection,
    * speech, tty, and tv, but this is only a hack because these are not defined
    * in the DOM at all.
+   *
    * @see http://www.w3.org/TR/CSS21/media.html#media-types
    */
-  sheetMediaAllowed.Media = {
+  sheetMediaAllowed.Media =
+  {
     ALL: "all",
     SCREEN: "screen"
   };
 
   /**
    * Is the given property sheet a system (user agent) stylesheet?
-   * @param {CSSStyleSheet} url The href of a stylesheet
-   * @return {boolean} true iff the given stylesheet is a system stylesheet
+   *
+   * @param {CSSStyleSheet} aUrl
+   *        The href of a stylesheet
+   * @return {boolean}
+   *         true iff the given stylesheet is a system stylesheet
    */
-  function isSystemStyleSheet(url) {
-    if (!url) return false;
-    if (url.length === 0) return true;
-    if (url[0] === 'h') return false;
-    if (url.substr(0, 9) === "resource:") return true;
-    if (url.substr(0, 7) === "chrome:") return true;
-    if (url === "XPCSafeJSObjectWrapper.cpp") return true;
-    if (url.substr(0, 6) === "about:") return true;
+  function isSystemStyleSheet(aUrl)
+  {
+    if (!aUrl) return false;
+    if (aUrl.length === 0) return true;
+    if (aUrl[0] === 'h') return false;
+    if (aUrl.substr(0, 9) === "resource:") return true;
+    if (aUrl.substr(0, 7) === "chrome:") return true;
+    if (aUrl === "XPCSafeJSObjectWrapper.cpp") return true;
+    if (aUrl.substr(0, 6) === "about:") return true;
     return false;
   }
 
   /**
    * Get a shorter version of a href.
    * TODO: Make this guarantee uniqueness
+   *
+   * @param {CSSStyleSheet} aDomSheet
+   *        The stylesheet DOM node to get a string for
    */
-  function getShortSource(domSheet) {
+  function getShortSource(aDomSheet)
+  {
     // Short version of href for use in select boxes etc.
-    if (!domSheet.href) {
+    if (!aDomSheet.href) {
       // Use a string like "inline" if there is no source href
-      return domSheet.ownerNode.id ?
-          "sheet#" + domSheet.ownerNode.id : "inline style element";
+      return aDomSheet.ownerNode.id ?
+          "sheet#" + aDomSheet.ownerNode.id : "inline style element";
     }
     else {
-      return domSheet.href.split("/").slice(-1);
+      return aDomSheet.href.split("/").slice(-1);
       /*
       // We try, in turn, the filename, filePath, query string, whole thing
       var url = Cc["@mozilla.org/network/io-service;1"].
@@ -134,38 +147,48 @@
   /**
    * Add one sheet object into the collection for the given domSheet, and for
    * each sheet imported using CSS import rules.
+   *
+   * @param {object} aSheets
+   *        An array of objects representing the stylesheets in the document
+   * @param {CSSStyleSheet} aDomSheet
+   *        DOM node representing the stylesheet to inspect
    */
-  function addSheet(sheets, domSheet) {
-    var href = domSheet.href || domSheet.ownerNode.ownerDocument.location;
+  function addSheet(aSheets, aDomSheet)
+  {
+    var href = aDomSheet.href || aDomSheet.ownerNode.ownerDocument.location;
     var ruleCount = 0; // Default for system stylesheets
     try {
-      ruleCount = domSheet.cssRules.length;
+      ruleCount = aDomSheet.cssRules.length;
     }
-    catch (ex) { }
-    var id = "s" + (domSheet.ownerNode.id ? domSheet.ownerNode.id : Object.keys(sheets).length);
+    catch (ex) {
+      // For system stylesheets
+    }
+    var id = "s" + (aDomSheet.ownerNode.id ?
+        aDomSheet.ownerNode.id :
+        Object.keys(aSheets).length);
 
-    sheets[id] = {
+    aSheets[id] = {
       rules: null, // populateRules() will populate with map of id->rule
-      domSheet: domSheet,
+      domSheet: aDomSheet,
       exposed: {
         id: id,
         href: href,
-        shortSource: getShortSource(domSheet),
-        systemSheet: isSystemStyleSheet(domSheet.href),
+        shortSource: getShortSource(aDomSheet),
+        systemSheet: isSystemStyleSheet(aDomSheet.href),
         ruleCount: ruleCount
       }
     };
 
-    // Find import rules.
+    // Find import rules
     try {
-      Array.prototype.forEach.call(domSheet.cssRules, function(domRule) {
+      Array.prototype.forEach.call(aDomSheet.cssRules, function(domRule) {
         if (domRule.type == CSSRule.IMPORT_RULE && domRule.styleSheet) {
-          addSheet(sheets, domRule.styleSheet);
+          addSheet(aSheets, domRule.styleSheet);
         }
       }, this);
     }
     catch (ex) {
-      // For system stylesheets.
+      // For system stylesheets
     }
   }
 
@@ -231,6 +254,72 @@
   }
 
   /**
+   * If the element has an id, return '#id', otherwise return 'tagname[n]'
+   * where n is the index of this element in its siblings.
+   *
+   * <p>A technically more 'correct' output from the no-id case might be:
+   * 'tagname:nth-of-type(n)' however this is unlikely to be more understood
+   * and it is longer.
+   *
+   * <p>We might consider using 'tagName.classNames' before resorting to the [n]
+   * case, however this could be length in some cases.
+   *
+   * @param {DOMElement} aElement
+   *        the element for which you want the short name.
+   * @return {string}
+   *         the string to be displayed for aElement.
+   */
+  function getShortName(aElement)
+  {
+    if (!aElement) {
+      return "null";
+    }
+    if (aElement.id) {
+      return "#" + aElement.id;
+    }
+
+    var priorSiblings = 0;
+    var temp = aElement;
+    while (temp = temp.previousElementSibling) {
+      priorSiblings++;
+    }
+    return aElement.tagName.toLowerCase() + "[" + priorSiblings + "]";
+  };
+
+  /**
+   * Get an array of short names from the given element to document.body.
+   * It will be common to use this as getShortNamePath(e).join(", ");
+   *
+   * @param {nsIDOMElement} aElement
+   *        the element for which you want the array of short names.
+   * @return {array} The array of shortNames (as defined by getShortName()) from
+   *         (and including) the given element to (but not including)
+   *         document.body.
+   */
+  function getShortNamePath(aElement)
+  {
+    var doc = aElement.ownerDocument;
+    var reply = [];
+
+    if (!aElement) {
+      return reply;
+    }
+
+    // We want to exclude nodes high up the tree (body/html) unless the user
+    // has selected that node, in which case we need to report something.
+    while (true) {
+      reply.unshift(getShortName(aElement));
+      aElement = aElement.parentNode;
+
+      if (!aElement) break;
+      if (aElement == doc.body) break;
+      if (aElement == doc.documentElement) break;
+    }
+
+    return reply;
+  };
+
+  /**
    * An array on functions each of which returns a string if it know why the
    * specified CSS property/value doesn't apply to the given element.
    */
@@ -244,6 +333,7 @@
             " has been marked as disabled using JavaScript.";
       }
     },
+
     /**
      * Wrong media type
      */
@@ -260,6 +350,33 @@
             " media type).";
       }
     },
+
+    /**
+     * Unmatched Selector
+     */
+    function isUnmatchedSelector(element, sheet, rule, setting) {
+      var matches = document.querySelectorAll(rule.domRule.selectorText);
+      // hierarchy is element and all it's parents
+      var hierarchy = [];
+      var node = element;
+      while (node) {
+        hierarchy.push(node);
+        node = node.parentNode;
+      }
+      var hierarchyMatch = Array.prototype.some.call(matches, function(match) {
+        return hierarchy.some(function(elementOrParent) {
+          return match == elementOrParent;
+        });
+      });
+
+      if (!hierarchyMatch) {
+        return "This rule does not work because the selector '" +
+            rule.domRule.selectorText + "' does not match the inspected" +
+            " element, which has the following path: '" +
+            getShortNamePath(element).join(" > ") + "'";
+      }
+    },
+
     /**
      * Working Rule!
      */
