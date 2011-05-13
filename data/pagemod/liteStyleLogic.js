@@ -35,50 +35,20 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+
 (function() {
-  /**
-   * Check if the given DOM CSS object holds an allowed media.
-   * Currently we only allow media screen or all.
-   *
-   * @param {CSSStyleSheet|CSSImportRule|CSSMediaRule} aDomObject
-   *        The DOM object you want checked
-   * @return {boolean}
-   *         true iff the media description is allowed
+  /*
+   * Navigating this file:
+   * First section:  Utilities: isSystemStyleSheet, getShortSource,
+   *                 getShortName, getShortNamePath, etc
+   * Second section: Sheet class (encapsulating a CSSStyleSheet)
+   * Third section:  Rule class (encapsulating a )
+   * Fourth section: Setting class (encapsulating a )
+   * Fifth section:  Answer Rules ()
+   * Sixth section: Implementation of StyleLogic (The remotable API)
    */
-  function sheetMediaAllowed(aDomObject)
-  {
-    var result = false;
-    var media = aDomObject.media;
 
-    if (media.length > 0) {
-      var mediaItem = null;
-      for (var m = 0; m < media.length; m++) {
-        mediaItem = media.item(m).toLowerCase();
-        if (mediaItem === sheetMediaAllowed.Media.SCREEN ||
-            mediaItem === sheetMediaAllowed.Media.ALL) {
-          result = true;
-          break;
-        }
-      }
-    } else {
-      result = true;
-    }
-
-    return result;
-  };
-  /**
-   * Known media values.
-   * The full list includes braille, embossed, handheld, print, projection,
-   * speech, tty, and tv, but this is only a hack because these are not defined
-   * in the DOM at all.
-   *
-   * @see http://www.w3.org/TR/CSS21/media.html#media-types
-   */
-  sheetMediaAllowed.Media =
-  {
-    ALL: "all",
-    SCREEN: "screen"
-  };
+  //----------------------------------------------------------------------------
 
   /**
    * Is the given property sheet a system (user agent) stylesheet?
@@ -101,11 +71,13 @@
   }
 
   /**
-   * Get a shorter version of a href.
-   * TODO: Make this guarantee uniqueness
+   * Get a shorter version of a href; something that is more helpful than the
+   * URL in identifying, to the user, which sheet is which.
    *
    * @param {CSSStyleSheet} aDomSheet
    *        The stylesheet DOM node to get a string for
+   * @return A user visible string representing the sheet
+   * @bug 656863 - getShortSource() in CSS Doctor should guarantee uniqueness
    */
   function getShortSource(aDomSheet)
   {
@@ -141,115 +113,6 @@
         }
       }
       */
-    }
-  }
-
-  /**
-   * Add one sheet object into the collection for the given domSheet, and for
-   * each sheet imported using CSS import rules.
-   *
-   * @param {object} aSheets
-   *        An array of objects representing the stylesheets in the document
-   * @param {CSSStyleSheet} aDomSheet
-   *        DOM node representing the stylesheet to inspect
-   */
-  function addSheet(aSheets, aDomSheet)
-  {
-    var href = aDomSheet.href || aDomSheet.ownerNode.ownerDocument.location;
-    var ruleCount = 0; // Default for system stylesheets
-    try {
-      ruleCount = aDomSheet.cssRules.length;
-    }
-    catch (ex) {
-      // For system stylesheets
-    }
-    var id = "s" + (aDomSheet.ownerNode.id ?
-        aDomSheet.ownerNode.id :
-        Object.keys(aSheets).length);
-
-    aSheets[id] = {
-      rules: null, // populateRules() will populate with map of id->rule
-      domSheet: aDomSheet,
-      exposed: {
-        id: id,
-        href: href,
-        shortSource: getShortSource(aDomSheet),
-        systemSheet: isSystemStyleSheet(aDomSheet.href),
-        ruleCount: ruleCount
-      }
-    };
-
-    // Find import rules
-    try {
-      Array.prototype.forEach.call(aDomSheet.cssRules, function(domRule) {
-        if (domRule.type == CSSRule.IMPORT_RULE && domRule.styleSheet) {
-          addSheet(aSheets, domRule.styleSheet);
-        }
-      }, this);
-    }
-    catch (ex) {
-      // For system stylesheets
-    }
-  }
-
-  /**
-   * Dig through the sheets in the current document
-   */
-  function populateSheets(sheets) {
-    Array.prototype.forEach.call(document.styleSheets, function(domSheet) {
-      addSheet(sheets, domSheet);
-    });
-  }
-
-  /**
-   * Dig through the rules in domSheet.cssRules and expose to the CssDoctor UI.
-   */
-  function populateRules(sheet, ruleList, idPrefix, medias) {
-    ruleList = ruleList || sheet.domSheet.cssRules;
-    medias = medias || Array.prototype.slice.call(sheet.domSheet.media, 0);
-    idPrefix = idPrefix || "";
-    sheet.rules = {};
-
-    var mediaIndex = 0;
-    Array.prototype.forEach.call(ruleList, function(domRule) {
-      if (domRule.type == CSSRule.STYLE_RULE) {
-        var id = sheet.exposed.id + "-" + idPrefix + "r" + Object.keys(sheet.rules).length;
-        sheet.rules[id] = {
-          settings: null, // populateSettings() populates to map of id->setting
-          domRule: domRule,
-          medias: medias, // die grammar nazis, die
-          exposed: {
-            id: id,
-            selectorGroup: domRule.selectorText.split(","),
-            propertyCount: domRule.length
-          }
-        };
-      } else if (domRule.type == CSSRule.MEDIA_RULE) {
-        var newIdPrefix = idPrefix + "m" + mediaIndex;
-        medias.push.apply(medias, Array.prototype.slice.call(domRule.media, 0));
-        populateRules(sheet, domRule.cssRules, newIdPrefix, medias);
-        mediaIndex++;
-      }
-    }, this);
-  }
-
-  /**
-   * Dig through the property/value pairs (i.e. settings) in a CSSRule to
-   * expose to the CssDoctor UI.
-   */
-  function populateSettings(rule) {
-    rule.settings = {};
-    var style = rule.domRule.style;
-    for (var i = 0; i < style.length; i++) {
-      var propertyName = style.item(i);
-      var id = rule.exposed.id + "-p" + Object.keys(rule.settings).length;
-      rule.settings[id] = {
-        exposed: {
-          id: id,
-          property: propertyName,
-          value: style.getPropertyValue(propertyName)
-        }
-      };
     }
   }
 
@@ -319,6 +182,209 @@
     return reply;
   };
 
+  //----------------------------------------------------------------------------
+
+  /**
+   * A Sheet represents a view of a DOM style sheet (i.e. a CSSStyleSheet) it
+   * gives us a good way to encapsulate a more convenient view of the data than
+   * CSSStyleSheet.
+   *
+   * @param {CSSStyleSheet} aDomSheet
+   *        The stylesheet that we encapsulate
+   */
+  function Sheet(aDomSheet) {
+    // populateRules() will populate this with map of id->rule
+    this.rules = null;
+    this.domSheet = aDomSheet;
+
+    var ruleCount = 0; // Default for system stylesheets
+    try {
+      ruleCount = aDomSheet.cssRules.length;
+    }
+    catch (ex) {
+      // For system stylesheets
+    }
+
+    if (aDomSheet.ownerNode.id) {
+      this.id = "s" + aDomSheet.ownerNode.id;
+    }
+    else {
+      this.id = "s" + (Sheet._sheetCount++);
+    }
+
+    this.href = aDomSheet.href || aDomSheet.ownerNode.ownerDocument.location;
+    this.shortSource = getShortSource(aDomSheet);
+    this.systemSheet = isSystemStyleSheet(aDomSheet.href);
+
+    this._initImportedSheets();
+  }
+
+  /**
+   * Accessor for the remote versions of all the sheets.
+   *
+   * @return {jsonObject[]}
+   *         Array of JSON objects for the remote versions of all known sheets
+   */
+  Sheet.getAllSheetRemotes = function Sheet_getAllSheetRemotes() {
+    Sheet._checkPopulated();
+    return Object.keys(Sheet._sheets).map(function(sheet) {
+      return Sheet._sheets[sheet].getRemote();
+    }.bind(this));
+  };
+
+  /**
+   * Accessor for a sheet specified by sheet id
+   *
+   * @param {string} aId
+   *        The ID of a known sheet
+   * @return A Sheet such that sheet.id = aId
+   * @throws {Error}
+   *        If aId does not match a known sheet.
+   */
+  Sheet.getSheet = function Sheet_getSheet(aId) {
+    // Normally Sheet._sheets will have been setup by a call to getSheets() but
+    // we might be coming in directly from the test page
+    Sheet._checkPopulated();
+    var sheet = Sheet._sheets[aId];
+    if (!sheet) {
+      throw new Error("Sheet " + aId + " not found.");
+    }
+    return sheet;
+  };
+
+  /**
+   * Handy function to check that the list of sheets has been created, and
+   * create it if not.
+   */
+  Sheet._checkPopulated = function Sheet_checkPopulated() {
+    if (!Sheet._sheets) {
+      Sheet._sheets = {};
+      Array.prototype.forEach.call(document.styleSheets, function(domSheet) {
+        Sheet._addSheet(domSheet);
+      });
+    }
+  };
+
+  /**
+   * Add one sheet object into the collection for the given domSheet, and for
+   * each sheet imported using CSS import rules.
+   *
+   * @param {object} aSheets
+   *        An array of objects representing the stylesheets in the document
+   * @param {CSSStyleSheet} aDomSheet
+   *        DOM node representing the stylesheet to inspect
+   */
+  Sheet._addSheet = function Sheet_addSheet(aDomSheet)
+  {
+    var sheet = new Sheet(aDomSheet);
+    Sheet._sheets[sheet.id] = sheet;
+  };
+
+  /**
+   * How many sheets have we created so far?
+   * TODO: Use Object.keys(Sheet._sheets).length?
+   */
+  Sheet._sheetCount = 0;
+
+  /**
+   * The cache of all the sheets that we've created so far
+   */
+  Sheet._sheets = null;
+
+  /**
+   * Find the imported stylesheets in this stylesheet, and setup Sheets for
+   * them.
+   * Important: This should only be called from the Sheet constructor.
+   */
+  Sheet.prototype._initImportedSheets = function Sheet_initImportedSheet() {
+    try {
+      Array.prototype.forEach.call(this.domSheet.cssRules, function(domRule) {
+        if (domRule.type == CSSRule.IMPORT_RULE && domRule.styleSheet) {
+          Sheet._addSheet(domRule.styleSheet);
+        }
+      }, this);
+    }
+    catch (ex) {
+      // For system stylesheets
+    }
+  };
+
+  /**
+   * Get a JSON object (i.e. nothing recursive or not representable in JSON)
+   * for passing over remote interfaces.
+   *
+   * @return {jsonObject}
+   *         A version of this sheet for remote use
+   */
+  Sheet.prototype.getRemote = function Sheet_getRemote() {
+    return {
+      id: this.id,
+      href: this.href,
+      shortSource: this.shortSource,
+      systemSheet: this.systemSheet,
+      ruleCount: this.ruleCount
+    };
+  };
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * Dig through the rules in domSheet.cssRules and expose to the CssDoctor UI.
+   */
+  function populateRules(sheet, ruleList, idPrefix, medias) {
+    ruleList = ruleList || sheet.domSheet.cssRules;
+    medias = medias || Array.prototype.slice.call(sheet.domSheet.media, 0);
+    idPrefix = idPrefix || "";
+    sheet.rules = {};
+
+    var mediaIndex = 0;
+    Array.prototype.forEach.call(ruleList, function(domRule) {
+      if (domRule.type == CSSRule.STYLE_RULE) {
+        var id = sheet.id + "-" + idPrefix + "r" + Object.keys(sheet.rules).length;
+        sheet.rules[id] = {
+          settings: null, // populateSettings() populates to map of id->setting
+          domRule: domRule,
+          medias: medias, // die grammar nazis, die
+          exposed: {
+            id: id,
+            selectorGroup: domRule.selectorText.split(","),
+            propertyCount: domRule.length
+          }
+        };
+      }
+      else if (domRule.type == CSSRule.MEDIA_RULE) {
+        var newIdPrefix = idPrefix + "m" + mediaIndex;
+        medias.push.apply(medias, Array.prototype.slice.call(domRule.media, 0));
+        populateRules(sheet, domRule.cssRules, newIdPrefix, medias);
+        mediaIndex++;
+      }
+    }, this);
+  }
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * Dig through the property/value pairs (i.e. settings) in a CSSRule to
+   * expose to the CssDoctor UI.
+   */
+  function populateSettings(rule) {
+    rule.settings = {};
+    var style = rule.domRule.style;
+    for (var i = 0; i < style.length; i++) {
+      var propertyName = style.item(i);
+      var id = rule.exposed.id + "-p" + Object.keys(rule.settings).length;
+      rule.settings[id] = {
+        exposed: {
+          id: id,
+          property: propertyName,
+          value: style.getPropertyValue(propertyName)
+        }
+      };
+    }
+  }
+
+  //----------------------------------------------------------------------------
+
   /**
    * An array on functions each of which returns a string if it know why the
    * specified CSS property/value doesn't apply to the given element.
@@ -357,6 +423,8 @@
     function isUnmatchedSelector(element, sheet, rule, setting) {
       var matches = document.querySelectorAll(rule.domRule.selectorText);
       // hierarchy is element and all it's parents
+      // TODO: we should only take notice of hierarchy when we know that
+      // setting.exposed.property is an inheriting property
       var hierarchy = [];
       var node = element;
       while (node) {
@@ -378,11 +446,30 @@
     },
 
     /**
+     * Dimensioned Inline element
+     */
+    function isDimensionedInline(element, sheet, rule, setting) {
+      var dimensions = [ "top", "bottom", "left", "right", "width", "height" ];
+      var dimensioned = dimensions.indexOf(setting.exposed.property) != -1;
+      var inlined = window.getComputedStyle(element, null)
+                          .getPropertyValue("display") == "inline";
+
+      if (dimensioned && inlined) {
+        return "Inline elements (i.e. those that have display:inline or that" +
+            " are inherently inline like span, em, etc) can't have dimensions" +
+            " like top, bottom, left, right, width, height";
+      }
+    },
+
+    /**
      * Working Rule!
      */
     function isWorking(element, sheet, rule, setting) {
       var actual = window.getComputedStyle(element, null)
-          .getPropertyValue(setting.exposed.property);
+                         .getPropertyValue(setting.exposed.property);
+
+      // TODO: getComputedStyle gives you top:30 even when that value is ignored
+      // due to display:inline. why?
 
       if (setting.exposed.value == actual) {
         return "The computed value of " + setting.exposed.property + " is" +
@@ -417,12 +504,12 @@
     return answers;
   }
 
+  //----------------------------------------------------------------------------
+
   /**
    * Implementation of the StyleLogic interface
    */
   function StyleLogic() {
-    // Object<sheetId, sheet>, populated by getSheets()
-    this.sheets = null;
   };
 
   /**
@@ -431,24 +518,14 @@
    * However, system sheets are marked and excluded from the doctor UI.
    */
   StyleLogic.prototype.getSheets = function getSheets() {
-    if (!this.sheets) {
-      this.sheets = {};
-      populateSheets(this.sheets);
-    }
-
-    return Object.keys(this.sheets).map(function(sheet) {
-      return this.sheets[sheet].exposed;
-    }.bind(this));
+    return Sheet.getAllSheetRemotes();
   };
 
   /**
    * Exported function to list the rules in a stylesheet.
    */
-  StyleLogic.prototype.getRules = function(sheetId) {
-    var sheet = this.sheets[sheetId];
-    if (!sheet) {
-      throw new Error("Sheet " + sheetId + " not found.");
-    }
+  StyleLogic.prototype.getRules = function(aId) {
+    var sheet = Sheet.getSheet(aId);
 
     if (!sheet.rules) {
       populateRules(sheet);
@@ -465,7 +542,7 @@
    */
   StyleLogic.prototype.getSettings = function(ruleId) {
     var sheetId = ruleId.split("-")[0];
-    var sheet = this.sheets[sheetId];
+    var sheet = Sheet._sheets[sheetId];
     if (!sheet) {
       throw new Error("Sheet " + sheetId + " not found.");
     }
@@ -504,18 +581,9 @@
     }
 
     var sheetId = settingId.split("-")[0];
-    // Normally this.sheets will have been setup by a call to getSheets() but
-    // we might be coming in directly from the test page
-    if (!this.sheets) {
-      this.sheets = {};
-      populateSheets(this.sheets);
-    }
-    var sheet = this.sheets[sheetId];
-    if (!sheet) {
-      throw new Error("Sheet " + sheetId + " not found.");
-    }
+    var sheet = Sheet.getSheet(sheetId);
     var ruleId = settingId.split("-").slice(0, 2).join("-");
-    // See above on this.sheets/getSheets()
+    // See above on Sheet._sheets/getSheets()
     if (!sheet.rules) {
       populateRules(sheet);
     }
@@ -523,7 +591,7 @@
     if (!rule) {
       throw new Error("Rule " + ruleId + " not found.");
     }
-    // See above on this.sheets/getSheets()
+    // See above on Sheet._sheets/getSheets()
     if (!rule.settings) {
       populateSettings(rule);
     }
