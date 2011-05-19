@@ -43,7 +43,7 @@ will be displayed.
 Implementation
 --------------
 
-There are 2 basic cases where the computed style of an element isn't equal
+There are 3 basic cases where the computed style of an element isn't equal
 to the an assignment in a CSS rule:
 
 - Selector mismatch: A misspelled class name will probably cause an assignment
