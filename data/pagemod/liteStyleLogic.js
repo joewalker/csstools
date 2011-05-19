@@ -211,9 +211,9 @@
     this.rules = null;
     this.domSheet = aDomSheet;
 
-    var ruleCount = 0; // Default for system stylesheets
+    this.ruleCount = 0; // Default for system stylesheets
     try {
-      ruleCount = aDomSheet.cssRules.length;
+      this.ruleCount = aDomSheet.cssRules.length;
     }
     catch (ex) {
       // For system stylesheets
@@ -241,9 +241,14 @@
    */
   Sheet.getAllSheetRemotes = function Sheet_getAllSheetRemotes() {
     Sheet._checkPopulated();
-    return Object.keys(Sheet._sheets).map(function(sheet) {
-      return Sheet._sheets[sheet].getRemote();
+    var reply = [];
+    Object.keys(Sheet._sheets).map(function(aId) {
+      var sheet = Sheet._sheets[aId];
+      if (!sheet._isCssDoctorImported()) {
+        reply.push(sheet.getRemote());
+      }
     }.bind(this));
+    return reply;
   };
 
   /**
@@ -311,6 +316,17 @@
   {
     var sheet = new Sheet(aDomSheet);
     Sheet._sheets[sheet.id] = sheet;
+  };
+
+  /**
+   * Quick hack to decide if we should ignore this sheet when we present the
+   * list to the UI.
+   */
+  Sheet.prototype._isCssDoctorImported = function() {
+    if (this.domSheet.ownerNode.className == "cssdocHide") {
+      return true;
+    }
+    return false;
   };
 
   /**
@@ -705,6 +721,9 @@
    * Exported function to list the sheets on the current page. Sheets are
    * included even if they are disabled, or if their media type is disallowed.
    * However, system sheets are marked and excluded from the doctor UI.
+   *
+   * @return {jsonObject}
+   *
    */
   StyleLogic.prototype.getSheets = function getSheets() {
     return Sheet.getAllSheetRemotes();
@@ -734,28 +753,29 @@
   /**
    * Exported function to explain the reason why a setting was not properly
    * applied to an element.
+   *
    */
-  StyleLogic.prototype.getAnswer = function(selectorOrElement, settingId, options) {
+  StyleLogic.prototype.getAnswer = function(aSelectorOrElement, aId, aOptions) {
     var element, name;
-    if (typeof selectorOrElement == "string") {
-      name = selectorOrElement;
-      element = document.querySelector(selectorOrElement);
+    if (typeof aSelectorOrElement == "string") {
+      name = aSelectorOrElement;
+      element = document.querySelector(aSelectorOrElement);
       if (!element) {
-        throw new Error("Element " + selectorOrElement + " not found");
+        throw new Error("Element " + aSelectorOrElement + " not found");
       }
     }
     else {
-      element = selectorOrElement;
+      element = aSelectorOrElement;
       name = element.id ?
           element.nodeName + "#" + element.id :
           "Selected Element";
     }
 
-    var sheet = Sheet.getSheet(settingId);
-    var rule = sheet.getRule(settingId);
-    var setting = rule.getSetting(settingId);
+    var sheet = Sheet.getSheet(aId);
+    var rule = sheet.getRule(aId);
+    var setting = rule.getSetting(aId);
 
-    var answers = findAnswer(element, name, sheet, rule, setting, options);
+    var answers = findAnswer(element, name, sheet, rule, setting, aOptions);
 
     return {
       answers: answers,

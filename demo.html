@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="author" content="Joe Walker">
+  <title>CSS Doctor Demo</title>
+  <script src="lite/start.js"></script>
+  <style id="demo">
+    body > p {
+      margin: auto; width: 150px;
+      border: 2px solid darkgreen; padding: 10px;
+      border-radius:10px;
+    }
+
+    #quickdemo { background-color: lightgreen; }
+  </style>
+</head>
+
+<body>
+
+<h1>CSS Doctor Demo Page</h1>
+
+<div>
+Normally this would run inside Firefox, and we'd have access to context menus.<br/>
+To simulate this, click <button onclick="CssDoctorLite.start();">Start CSS Doctor</button>
+and then click in the green bordered box.
+</div>
+
+<p id="quickdemo">
+  Some text that we're using in a quick demo
+</p>
+
+
+</body>
+</html>
