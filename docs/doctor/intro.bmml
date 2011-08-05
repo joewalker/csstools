@@ -1,0 +1,99 @@
+<mockup version="1.0" skin="sketch" measuredW="820" measuredH="863" mockupW="793" mockupH="765">
+  <controls>
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::TabBar" x="302" y="268" w="308" h="291" measuredW="270" measuredH="100" zOrder="0" locked="false" isInGroup="-1">
+      <controlProperties>
+        <selectedIndex>-1</selectedIndex>
+        <text>Errors%2C%20Doctor%2C%20Inspector</text>
+      </controlProperties>
+    </control>
+    <control controlID="1" controlTypeID="com.balsamiq.mockups::Arrow" x="217" y="222" w="109" h="46" measuredW="150" measuredH="100" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <backgroundAlpha>0.5</backgroundAlpha>
+        <color>2848996</color>
+        <leftArrow>false</leftArrow>
+        <text/>
+      </controlProperties>
+    </control>
+    <control controlID="4" controlTypeID="com.balsamiq.mockups::Paragraph" x="27" y="193" w="200" h="191" measuredW="200" measuredH="140" zOrder="2" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <text>Errors%20are%20basic%20%27woah%20-%20before%20we%20even%20start%20talking%20you%20need%20to%20fix%20this%27.%0A%20%0AThis%20is%20like%20a%20financial%20adviser%20saying%20_%22I%20know%20you%20wanted%20portfolio%20advice%2C%20but%20lets%20start%20by%20getting%20you%20a%20bank%20account%22_</text>
+      </controlProperties>
+    </control>
+    <control controlID="5" controlTypeID="com.balsamiq.mockups::Paragraph" x="287" y="98" w="432" h="86" measuredW="200" measuredH="140" zOrder="3" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <text>The%20*Doctor*%20tab%20helps%20the%20user%20answer%20the%20questions%20that%20they%20come%20to%20us%20with.%20It%20was%20designed%20to%20bite%20off%20as%20many%20common%20questions%20as%20it%20can%2C%20and%20answer%20them%20as%20fast%20as%20it%20can.%20The%20initial%20goal%20was%20to%20solve%20about%2080%25%20of%20CSS%20questions%20in%20under%205%20seconds.</text>
+      </controlProperties>
+    </control>
+    <control controlID="9" controlTypeID="com.balsamiq.mockups::Arrow" x="395" y="190" w="11" h="78" measuredW="150" measuredH="100" zOrder="4" locked="false" isInGroup="-1">
+      <controlProperties>
+        <backgroundAlpha>0.5</backgroundAlpha>
+        <color>2848996</color>
+        <curvature>0</curvature>
+        <direction>bottom</direction>
+        <leftArrow>true</leftArrow>
+        <rightArrow>false</rightArrow>
+        <text/>
+      </controlProperties>
+    </control>
+    <control controlID="10" controlTypeID="com.balsamiq.mockups::Paragraph" x="631" y="222" w="189" h="234" measuredW="200" measuredH="140" zOrder="5" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <text>The%20Inspector%20Panel%20is%20there%20because%20the%20Doctor%20can%27t%20fix%20everything.%0A%20%0AIt%27s%20the%20financial%20adviser%20equivalent%20of%20saying%20_%22You%27ve%20exhausted%20my%20knowledge%20of%20FOO%2C%20but%20I%20can%20point%20you%20at%20the%20stock%20charts%20for%20FOO%2C%20maybe%20you%20can%20work%20it%20out%20from%20there%22_</text>
+      </controlProperties>
+    </control>
+    <control controlID="11" controlTypeID="com.balsamiq.mockups::Arrow" x="499" y="246" w="125" h="30" measuredW="150" measuredH="100" zOrder="6" locked="false" isInGroup="-1">
+      <controlProperties>
+        <backgroundAlpha>0.5</backgroundAlpha>
+        <color>2848996</color>
+        <direction>bottom</direction>
+        <leftArrow>true</leftArrow>
+        <rightArrow>false</rightArrow>
+        <text/>
+      </controlProperties>
+    </control>
+    <control controlID="13" controlTypeID="com.balsamiq.mockups::Image" x="194" y="627" w="-1" h="-1" measuredW="588" measuredH="236" zOrder="7" locked="false" isInGroup="-1">
+      <controlProperties>
+        <src>./assets/console-errors.png</src>
+        <text/>
+      </controlProperties>
+    </control>
+    <control controlID="14" controlTypeID="com.balsamiq.mockups::SubTitle" x="33" y="461" w="-1" h="-1" measuredW="137" measuredH="40" zOrder="8" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>11820806</color>
+        <text>Error%20Panel</text>
+      </controlProperties>
+    </control>
+    <control controlID="15" controlTypeID="com.balsamiq.mockups::Paragraph" x="33" y="501" w="246" h="111" measuredW="200" measuredH="140" zOrder="9" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <text>We%20kind%20of%20already%20have%20this%20in%20the%20web%20console%2C%20however%20the%20layout%20there%20often%20gets%20in%20the%20way%20of%20what%20you%27re%20trying%20to%20do%2C%20and%20it%20could%20be%20presented%20in%20a%20far%20more%20usable%20way.</text>
+      </controlProperties>
+    </control>
+    <control controlID="16" controlTypeID="com.balsamiq.mockups::Arrow" x="90" y="612" w="89" h="58" measuredW="150" measuredH="100" zOrder="10" locked="false" isInGroup="-1">
+      <controlProperties>
+        <backgroundAlpha>0.5</backgroundAlpha>
+        <color>2848996</color>
+        <curvature>-1</curvature>
+        <leftArrow>false</leftArrow>
+        <text/>
+      </controlProperties>
+    </control>
+    <control controlID="17" controlTypeID="com.balsamiq.mockups::Arrow" x="90" y="375" w="24" h="86" measuredW="150" measuredH="100" zOrder="11" locked="false" isInGroup="-1">
+      <controlProperties>
+        <backgroundAlpha>0.5</backgroundAlpha>
+        <color>2848996</color>
+        <curvature>0</curvature>
+        <leftArrow>false</leftArrow>
+        <text/>
+      </controlProperties>
+    </control>
+    <control controlID="19" controlTypeID="com.balsamiq.mockups::Label" x="273" y="583" w="492" h="25" measuredW="492" measuredH="25" zOrder="12" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <text>Since%20we%27ve%20got%20a%20way%20to%20do%20this%20already%2C%20a%20new%20error%20panel%20isn%27t%20a%20priority.</text>
+      </controlProperties>
+    </control>
+  </controls>
+</mockup>

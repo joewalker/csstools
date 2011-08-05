@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Devtools CSS Panels</title>
+  <style type="text/css">
+  html { font-family: Calibri; }
+  body { width: 800px; margin: 0 auto; }
+  h1, h2 { color: #B56122; }
+  </style>
+</head>
+
+<body>
+<h1>Devtools CSS Panels</h1>
+<p>Firefox developer tools is planning to have a different set of CSS panels to Firebug and other browsers. This document explains those panels and why we're changing things. The Inspector panel is planned for this quarter, the Doctor for the next.</p>
+<p>&nbsp;</p>
+<p><img src="intro.png" width="793" height="765" alt="initial panel layout"></p>
+<h2>CSS Doctor</h2>
+<h3>(a.k.a Your own personal dbaron)</h3>
+<p>What we're trying to do: The user is editing some CSS, they've changed a rule, they flip to the brower and hit F5, but their change hasn't had the desired effect. Why not?</p>
+<p>So they right click on the broken element, we help them find the rule they were editing, and then we tell them what's wrong. The right-click part is a well understood problem, this is about the 'rule selection' part.</p>
+<p><img src="css-doctor.png" width="800" height="1833" alt="explanation of doctor pane;"></p>
+<p>There is a working prototype of the CSS Doctor at <a href="https://people.mozilla.com/~jwalker/cssdoctor/demo.html">https://people.mozilla.com/~jwalker/cssdoctor/demo.html</a></p>
+<h2>CSS Inspector</h2>
+<h3>(a.k.a Firebug's 'CSS' panel and 'Computed Style' panel combined)</h3>
+<p>Firebug has a CSS panel which contains *all* the styles that apply to a node, sorted according to the following:</p>
+<ul>
+  <li>node hierachy (i.e. selected node at the top, body/html at the bottom, intervening nodes in-between)</li>
+  <li>stylesheet (in document order)</li>
+  <li>rule (in stylesheet order)</li>
+</ul>
+<p>The problems with this view are:</p>
+<ul>
+  <li>You generally know what property you're investigating, but these property settings are spread around</li>
+  <li>If you have a typo in the selector, your rule will not show at all</li>
+  <li>If you have a typo in the property name, your rule will not show at all</li>
+  <li>It doesn't tell you about rule specificity</li>
+  <li>It can be hard to find which rule won</li>
+</ul>
+<p>We propose sorting the CSS panel by property, and combining it with the Computed Style panel.</p>
+<p><img src="css-inspector.png" width="782" height="1102"></p>
+</body>
+</html>

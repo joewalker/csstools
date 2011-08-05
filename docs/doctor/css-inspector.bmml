@@ -1,0 +1,222 @@
+<mockup version="1.0" skin="sketch" measuredW="791" measuredH="1111" mockupW="775" mockupH="1097">
+  <controls>
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::TabBar" x="207" y="92" w="470" h="454" measuredW="269" measuredH="100" zOrder="0" locked="false" isInGroup="-1">
+      <controlProperties>
+        <selectedIndex>2</selectedIndex>
+        <text>Errors%2C%20Doctor%2C%20Inspector</text>
+      </controlProperties>
+    </control>
+    <control controlID="1" controlTypeID="com.balsamiq.mockups::SearchBox" x="509" y="140" w="145" h="-1" measuredW="117" measuredH="25" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>filter%20property</text>
+      </controlProperties>
+    </control>
+    <control controlID="2" controlTypeID="com.balsamiq.mockups::Tree" x="235" y="187" w="379" h="301" measuredW="300" measuredH="663" zOrder="2" locked="false" isInGroup="-1">
+      <controlProperties>
+        <borderStyle>none</borderStyle>
+        <text>%3E%20color%20%7Bcolor%3A%23888888%7Drgb%28255%2C0%2C0%29%7Bcolor%7D%20%20%BB%0A%3E%20font-family%20%7Bcolor%3A%23888888%7DHelvetica%7Bcolor%7D%20%20%BB%0A%3E%20font-size%20%7Bcolor%3A%23888888%7D14pt%7Bcolor%7D%20%20%BB%0A%3E%20padding-top%20%7Bcolor%3A%23888888%7D0px%7Bcolor%7D%20%20%BB%0A%3E%20padding-bottom%20%7Bcolor%3A%23888888%7D10px%7Bcolor%7D%20%20%BB%0A%3E%20padding-left%20%7Bcolor%3A%23888888%7D2px%7Bcolor%7D%20%20%BB%0A%3E%20padding-right%20%7Bcolor%3A%23888888%7D2px%7Bcolor%7D%20%20%BB%0A%3E%20margin-top%20%7Bcolor%3A%23888888%7D3px%7Bcolor%7D%20%20%BB%0A%3E%20margin-bottom%20%7Bcolor%3A%23888888%7D3px%7Bcolor%7D%20%20%BB%0A%3E%20margin-left%20%7Bcolor%3A%23888888%7D0px%7Bcolor%7D%20%20%BB%0A%3E%20margin-right%20%7Bcolor%3A%23888888%7D0px%7Bcolor%7D%20%20%BB%0A_%0Af%20Use%20f%20for%20closed%20folders%0AF%20Use%20F%20for%20open%20folders%0A%5B+%5D%20You%20may%20also%20use%20this%0A%5B-%5D%20and%20this%0A%5Bx%5D%20or%20this%0A%5B%20%5D%20and%20this%0A%3E%20or%20even%20this%0Av%20and%20this%0A-%20Use%20-%20for%20a%20file%20icon%0A_%20or%20_%20to%20leave%20a%20space%20for%20your%20own%20icon%0AF%20use%20spaces%20or%20dots%20for%20hierarchy%0A%20v%20just%20like%0A..-%20this</text>
+        <verticalScrollbar>false</verticalScrollbar>
+      </controlProperties>
+    </control>
+    <control controlID="3" controlTypeID="com.balsamiq.mockups::CheckBox" x="322" y="141" w="-1" h="-1" measuredW="164" measuredH="22" zOrder="3" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Include%20default%20styles</text>
+      </controlProperties>
+    </control>
+    <control controlID="5" controlTypeID="com.balsamiq.mockups::Tree" x="484" y="186" w="173" h="301" measuredW="300" measuredH="313" zOrder="4" locked="false" isInGroup="-1">
+      <controlProperties>
+        <borderStyle>none</borderStyle>
+        <text>_%203%20rules%0A_%204%20rules%0A_%201%20unmatched%20rule%0A_%205%20unmatched%20rules%0A_%204%20rules%0A_%203%20rules%0A_%202%20rules%0A_%204%20rules%0A_%205%20rules%0A_%2020%20rules%0A_%201%20rule</text>
+        <verticalScrollbar>true</verticalScrollbar>
+      </controlProperties>
+    </control>
+    <control controlID="8" controlTypeID="com.balsamiq.mockups::Arrow" x="431" y="55" w="15" h="85" measuredW="150" measuredH="100" zOrder="5" locked="false" isInGroup="-1">
+      <controlProperties>
+        <backgroundAlpha>0.5</backgroundAlpha>
+        <color>2848996</color>
+        <curvature>0</curvature>
+        <direction>bottom</direction>
+        <leftArrow>true</leftArrow>
+        <rightArrow>false</rightArrow>
+        <text/>
+      </controlProperties>
+    </control>
+    <control controlID="9" controlTypeID="com.balsamiq.mockups::Label" x="235" y="14" w="364" h="51" measuredW="663" measuredH="25" zOrder="6" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <markup>true</markup>
+        <text>By%20default%20we%20don%27t%20show%20system%20stylesheets%2C%20so%20the%20user%20doesn%27t%20see%20the%20defaults.%20This%20adds%20them%20in.</text>
+      </controlProperties>
+    </control>
+    <control controlID="10" controlTypeID="com.balsamiq.mockups::Arrow" x="260" y="483" w="129" h="98" measuredW="150" measuredH="100" zOrder="7" locked="false" isInGroup="-1">
+      <controlProperties>
+        <backgroundAlpha>0.5</backgroundAlpha>
+        <color>2848996</color>
+        <curvature>-1</curvature>
+        <direction>bottom</direction>
+        <leftArrow>false</leftArrow>
+        <rightArrow>true</rightArrow>
+        <text/>
+      </controlProperties>
+    </control>
+    <control controlID="11" controlTypeID="com.balsamiq.mockups::Label" x="113" y="559" w="153" h="47" measuredW="279" measuredH="25" zOrder="8" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <markup>true</markup>
+        <text>Click%20to%20access%20MDN%20docs%20on%20each%20property</text>
+      </controlProperties>
+    </control>
+    <control controlID="12" controlTypeID="com.balsamiq.mockups::Arrow" x="146" y="146" w="89" h="72" measuredW="150" measuredH="100" zOrder="9" locked="false" isInGroup="-1">
+      <controlProperties>
+        <backgroundAlpha>0.5</backgroundAlpha>
+        <color>2848996</color>
+        <curvature>0</curvature>
+        <direction>top</direction>
+        <leftArrow>false</leftArrow>
+        <rightArrow>true</rightArrow>
+        <text/>
+      </controlProperties>
+    </control>
+    <control controlID="13" controlTypeID="com.balsamiq.mockups::Label" x="39" y="102" w="140" h="71" measuredW="300" measuredH="25" zOrder="10" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <markup>true</markup>
+        <text>Click%20to%20dig%20into%20the%20settings%20for%20this%20property</text>
+      </controlProperties>
+    </control>
+    <control controlID="14" controlTypeID="com.balsamiq.mockups::Arrow" x="165" y="296" w="187" h="63" measuredW="150" measuredH="100" zOrder="11" locked="false" isInGroup="-1">
+      <controlProperties>
+        <backgroundAlpha>0.5</backgroundAlpha>
+        <color>2848996</color>
+        <curvature>0</curvature>
+        <direction>top</direction>
+        <leftArrow>false</leftArrow>
+        <rightArrow>true</rightArrow>
+        <text/>
+      </controlProperties>
+    </control>
+    <control controlID="15" controlTypeID="com.balsamiq.mockups::Label" x="39" y="251" w="140" h="71" measuredW="374" measuredH="25" zOrder="12" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <markup>true</markup>
+        <text>Information%20from%20the%20%27Computed%20Style%27%20panel%20is%20right%20here</text>
+      </controlProperties>
+    </control>
+    <control controlID="16" controlTypeID="com.balsamiq.mockups::TabBar" x="16" y="657" w="470" h="454" measuredW="269" measuredH="100" zOrder="13" locked="false" isInGroup="-1">
+      <controlProperties>
+        <selectedIndex>2</selectedIndex>
+        <text>Errors%2C%20Doctor%2C%20Inspector</text>
+      </controlProperties>
+    </control>
+    <control controlID="17" controlTypeID="com.balsamiq.mockups::SearchBox" x="321" y="700" w="145" h="-1" measuredW="117" measuredH="25" zOrder="14" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>filter%20property</text>
+      </controlProperties>
+    </control>
+    <control controlID="18" controlTypeID="com.balsamiq.mockups::Tree" x="44" y="752" w="379" h="301" measuredW="300" measuredH="763" zOrder="15" locked="false" isInGroup="-1">
+      <controlProperties>
+        <borderStyle>none</borderStyle>
+        <text>%3E%20color%20%7Bcolor%3A%23888888%7Drgb%28255%2C0%2C0%29%7Bcolor%7D%20%20%BB%0Av%20font-family%20%7Bcolor%3A%23888888%7DHelvetica%7Bcolor%7D%20%20%BB%0A_%20p.win%20%5C-%3E%20%7Bcolor%3A%23888888%7DHelvetica%7Bcolor%7D%20%7Bcolor%3A%23000088%7Dstyles.css%3A32%7Bcolor%7D%0A_%20html%20%5C-%3E%20%7Bcolor%3A%23888888%7Dsans%5C-serif%7Bcolor%7D%20%7Bcolor%3A%23000088%7Dgeneric.css%3A2%7Bcolor%7D%0A_%20p%20%5C-%3E%20Arial%20%7Bcolor%3A%23000088%7Dstyles.css%3A32%7Bcolor%7D%0A_%20%7Bcolor%3A%23AA6666%7Ddiv%20%5C-%3E%20Comic%20Sans%7Bcolor%7D%20%7Bcolor%3A%23000088%7Dstyles.css%3A32%7Bcolor%7D%0A%3E%20font-size%20%7Bcolor%3A%23888888%7D14pt%7Bcolor%7D%20%20%BB%0A%3E%20padding-top%20%7Bcolor%3A%23888888%7D0px%7Bcolor%7D%20%20%BB%0A%3E%20padding-bottom%20%7Bcolor%3A%23888888%7D10px%7Bcolor%7D%20%20%BB%0A%3E%20padding-left%20%7Bcolor%3A%23888888%7D2px%7Bcolor%7D%20%20%BB%0A%3E%20padding-right%20%7Bcolor%3A%23888888%7D2px%7Bcolor%7D%20%20%BB%0A%3E%20margin-top%20%7Bcolor%3A%23888888%7D3px%7Bcolor%7D%20%20%BB%0A%3E%20margin-bottom%20%7Bcolor%3A%23888888%7D3px%7Bcolor%7D%20%20%BB%0A%3E%20margin-left%20%7Bcolor%3A%23888888%7D0px%7Bcolor%7D%20%20%BB%0A%3E%20margin-right%20%7Bcolor%3A%23888888%7D0px%7Bcolor%7D%20%20%BB%0A_%0Af%20Use%20f%20for%20closed%20folders%0AF%20Use%20F%20for%20open%20folders%0A%5B+%5D%20You%20may%20also%20use%20this%0A%5B-%5D%20and%20this%0A%5Bx%5D%20or%20this%0A%5B%20%5D%20and%20this%0A%3E%20or%20even%20this%0Av%20and%20this%0A-%20Use%20-%20for%20a%20file%20icon%0A_%20or%20_%20to%20leave%20a%20space%20for%20your%20own%20icon%0AF%20use%20spaces%20or%20dots%20for%20hierarchy%0A%20v%20just%20like%0A..-%20this</text>
+        <verticalScrollbar>false</verticalScrollbar>
+      </controlProperties>
+    </control>
+    <control controlID="20" controlTypeID="com.balsamiq.mockups::Tree" x="293" y="751" w="173" h="301" measuredW="300" measuredH="413" zOrder="16" locked="false" isInGroup="-1">
+      <controlProperties>
+        <borderStyle>none</borderStyle>
+        <text>_%203%20rules%0A_%204%20rules%0A_%0A_%0A_%0A_%0A_%201%20unmatched%20rule%0A_%205%20unmatched%20rules%0A_%204%20rules%0A_%203%20rules%0A_%202%20rules%0A_%204%20rules%0A_%205%20rules%0A_%2020%20rules%0A_%201%20rule</text>
+        <verticalScrollbar>true</verticalScrollbar>
+      </controlProperties>
+    </control>
+    <control controlID="22" controlTypeID="com.balsamiq.mockups::Arrow" x="575" y="92" w="79" h="48" measuredW="150" measuredH="100" zOrder="17" locked="false" isInGroup="-1">
+      <controlProperties>
+        <backgroundAlpha>0.5</backgroundAlpha>
+        <color>2848996</color>
+        <curvature>0</curvature>
+        <direction>bottom</direction>
+        <leftArrow>true</leftArrow>
+        <rightArrow>false</rightArrow>
+        <text/>
+      </controlProperties>
+    </control>
+    <control controlID="23" controlTypeID="com.balsamiq.mockups::Label" x="662" y="55" w="93" h="47" measuredW="146" measuredH="25" zOrder="18" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <markup>true</markup>
+        <text>Live%20substring%20filtering</text>
+      </controlProperties>
+    </control>
+    <control controlID="24" controlTypeID="com.balsamiq.mockups::Label" x="32" y="371" w="155" h="154" measuredW="873" measuredH="25" zOrder="19" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <markup>true</markup>
+        <text>The%20current%20Style%20Inspector%20groups%20the%20properties%2C%20and%20shows%20them%20all%20by%20default.%20This%20is%20a%20proposed%20change%20to%20simplify%20the%20initial%20view.</text>
+      </controlProperties>
+    </control>
+    <control controlID="25" controlTypeID="com.balsamiq.mockups::Arrow" x="71" y="868" w="99" h="10" measuredW="150" measuredH="100" zOrder="20" locked="false" isInGroup="-1">
+      <controlProperties>
+        <backgroundAlpha>0.5</backgroundAlpha>
+        <curvature>0</curvature>
+        <leftArrow>false</leftArrow>
+        <rightArrow>false</rightArrow>
+        <text/>
+      </controlProperties>
+    </control>
+    <control controlID="26" controlTypeID="com.balsamiq.mockups::Arrow" x="71" y="840" w="114" h="10" measuredW="150" measuredH="100" zOrder="21" locked="false" isInGroup="-1">
+      <controlProperties>
+        <backgroundAlpha>0.5</backgroundAlpha>
+        <curvature>0</curvature>
+        <leftArrow>false</leftArrow>
+        <rightArrow>false</rightArrow>
+        <text/>
+      </controlProperties>
+    </control>
+    <control controlID="29" controlTypeID="com.balsamiq.mockups::VCurly" x="496" y="801" w="295" h="107" measuredW="180" measuredH="140" zOrder="22" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <direction>left</direction>
+        <text>Matched%20but%20overloaded%20-%3E%20strikethrough%0ADoes%20not%20match%20-%3E%20red</text>
+      </controlProperties>
+    </control>
+    <control controlID="30" controlTypeID="com.balsamiq.mockups::Arrow" x="284" y="742" w="224" h="98" measuredW="150" measuredH="100" zOrder="23" locked="false" isInGroup="-1">
+      <controlProperties>
+        <backgroundAlpha>0.5</backgroundAlpha>
+        <color>2848996</color>
+        <curvature>0</curvature>
+        <direction>bottom</direction>
+        <leftArrow>true</leftArrow>
+        <rightArrow>false</rightArrow>
+        <text/>
+      </controlProperties>
+    </control>
+    <control controlID="31" controlTypeID="com.balsamiq.mockups::Label" x="517" y="715" w="112" h="47" measuredW="182" measuredH="25" zOrder="24" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <markup>true</markup>
+        <text>Click%20to%20open%20in%20style%20editor</text>
+      </controlProperties>
+    </control>
+    <control controlID="32" controlTypeID="com.balsamiq.mockups::Arrow" x="284" y="908" w="239" h="86" measuredW="150" measuredH="100" zOrder="25" locked="false" isInGroup="-1">
+      <controlProperties>
+        <backgroundAlpha>0.5</backgroundAlpha>
+        <color>2848996</color>
+        <curvature>0</curvature>
+        <direction>top</direction>
+        <leftArrow>true</leftArrow>
+        <rightArrow>false</rightArrow>
+        <text/>
+      </controlProperties>
+    </control>
+    <control controlID="33" controlTypeID="com.balsamiq.mockups::Label" x="531" y="969" w="138" h="127" measuredW="709" measuredH="25" zOrder="26" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <markup>true</markup>
+        <text>We%27re%20concerned%20that%20there%20could%20be%20lots%20of%20unmatched%20rules%20so%20we%20always%20have%20a%20separate%20opener%20for%20these.</text>
+      </controlProperties>
+    </control>
+    <control controlID="34" controlTypeID="com.balsamiq.mockups::CheckBox" x="142" y="701" w="164" h="22" measuredW="164" measuredH="22" zOrder="27" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Include%20default%20styles</text>
+      </controlProperties>
+    </control>
+  </controls>
+</mockup>
